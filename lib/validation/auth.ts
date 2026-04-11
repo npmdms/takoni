@@ -6,8 +6,17 @@ export const signUpSchema = z.object({
   username: z
     .string()
     .min(1, "Please create a username.")
-    .regex(/^[a-zA-Z0-9]+$/, { message: "Only alphanumeric characters are allowed" }),
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: "Only alphanumeric characters are allowed",
+    }),
   emailPreferences: z.boolean(),
 });
 
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
+
+export const signInSchema = z.object({
+  email: z.string().email("Please provide a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type SignInFormValues = z.infer<typeof signInSchema>;

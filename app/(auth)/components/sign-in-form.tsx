@@ -1,5 +1,11 @@
 "use client";
 
+import { SignInFormValues, signInSchema } from "@/lib/validation/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
 import {
   Field,
   FieldError,
@@ -7,53 +13,40 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { SignUpFormValues, signUpSchema } from "@/lib/validation/auth";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 
-export default function SignUpForm() {
+export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
 
-  const form = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
+  const form = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
-      username: "",
-      emailPreferences: true,
     },
   });
 
-  async function onSubmit(values: SignUpFormValues) {
+  async function onSubmit(values: SignInFormValues) {
     setLoading(true);
     setServerError(null);
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+      const res = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
       });
 
-      const result = await res.json();
-
-      if (!res.ok) {
-        setServerError(
-          result.error ?? "Something went wrong. Please try again.",
-        );
+      if (!res?.ok) {
+        setServerError("Invalid email or password");
         return;
       }
 
-      router.push("/sign-in");
+      router.push("/dashboard");
     } catch {
       setServerError(
         "Unable to connect. Please check your connection and try again.",
@@ -80,9 +73,14 @@ export default function SignUpForm() {
                   {...field}
                   id="email"
                   disabled={loading}
-                  aria-invalid={fieldState.invalid}
+                  type="email"
                   placeholder="Email"
                   autoComplete="email"
+                  aria-invalid={fieldState.invalid}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (serverError) setServerError(null);
+                  }}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -102,56 +100,17 @@ export default function SignUpForm() {
                   id="password"
                   disabled={loading}
                   type="password"
-                  aria-invalid={fieldState.invalid}
                   placeholder="Password"
-                  autoComplete="new-password"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="username"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
-                <Input
-                  {...field}
-                  id="username"
-                  disabled={loading}
+                  autoComplete="current-password"
                   aria-invalid={fieldState.invalid}
-                  placeholder="Username"
-                  autoComplete="username"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (serverError) setServerError(null);
+                  }}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="emailPreferences"
-            control={form.control}
-            render={({ field }) => (
-              <Field>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="emailPreferences"
-                    disabled={loading}
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    onBlur={field.onBlur}
-                    ref={field.ref}
-                  />
-                  <FieldLabel htmlFor="emailPreferences">
-                    I want to receive product updates and announcements
-                  </FieldLabel>
-                </div>
               </Field>
             )}
           />
@@ -164,7 +123,7 @@ export default function SignUpForm() {
           )}
 
           <Button type="submit" disabled={loading}>
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </FieldGroup>
       </form>

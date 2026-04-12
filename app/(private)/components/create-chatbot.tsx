@@ -1,12 +1,6 @@
-"use client";
+"use client"
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Field,
   FieldError,
@@ -23,61 +17,67 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  addOrganizationSchema,
-  AddOrganizationValues,
-} from "@/lib/validation/organization";
+  createChatbotSchema,
+  CreateChatbotValues,
+} from "@/lib/validation/chatbot";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AddIcon, Alert02Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { AddIcon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-export default function CreateOrganization() {
+interface Props {
+  organizationId: string;
+  slug: string;
+}
+
+export default function CreateChatbot({ organizationId, slug }: Props) {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const form = useForm<AddOrganizationValues>({
-    resolver: zodResolver(addOrganizationSchema),
+  const form = useForm<CreateChatbotValues>({
+    resolver: zodResolver(createChatbotSchema),
     defaultValues: {
       name: "",
       description: "",
-      supportEmail: "",
-      address: "",
+      systemPrompt: "",
+      welcomeMessage: "",
+      isActive: false,
+      requirePreChat: false,
     },
   });
 
-  async function onSubmit(values: AddOrganizationValues) {
+  async function onSubmit(values: CreateChatbotValues) {
     setLoading(true);
     setServerError(null);
 
     try {
-      const res = await fetch("/api/organizations", {
+      const res = await fetch(`/api/organizations/${organizationId}/chatbots`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(values),
       });
 
-      const result = await res.json();
+      const data = await res.json();
 
       if (!res.ok) {
-        setServerError(
-          result.error ?? "Something went wrong. Please try again.",
-        );
+        setServerError(data.error ?? "Failed to create chatbot");
         return;
       }
 
       form.reset();
       setOpen(false);
       router.refresh();
-    } catch {
-      setServerError(
-        "Unable to connect. Please check your connection and try again.",
-      );
+    } catch (error) {
+      setServerError("Unable to connect. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -89,14 +89,14 @@ export default function CreateOrganization() {
         <SheetTrigger asChild>
           <Button>
             <HugeiconsIcon icon={AddIcon} />
-            Add Organization
+            Add Chatbot
           </Button>
         </SheetTrigger>
         <SheetContent className="overflow-y-auto pb-24">
           <SheetHeader>
-            <SheetTitle>Add Organization</SheetTitle>
+            <SheetTitle>Add Chatbot</SheetTitle>
             <SheetDescription>Please fill out</SheetDescription>
-            <Separator className="my-3" />
+            <Separator />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-1"
@@ -107,14 +107,13 @@ export default function CreateOrganization() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">Organization Name</FieldLabel>
+                      <FieldLabel htmlFor="name">Chatbot Name</FieldLabel>
                       <Input
                         {...field}
                         id="name"
                         disabled={loading}
                         aria-invalid={fieldState.invalid}
                         placeholder="Name"
-                        autoComplete="name"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -145,21 +144,23 @@ export default function CreateOrganization() {
                 />
 
                 <Controller
-                  name="supportEmail"
+                  name="systemPrompt"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="supportEmail">
-                        Support Email
+                      <FieldLabel htmlFor="systemPrompt">
+                        System Prompt{" "}
+                        <span className="text-muted-foreground">
+                          (optional)
+                        </span>
                       </FieldLabel>
-                      <Input
+                      <Textarea
                         {...field}
-                        id="supportEmail"
-                        type="email"
+                        id="systemPrompt"
                         disabled={loading}
                         aria-invalid={fieldState.invalid}
-                        placeholder="support@example.com"
-                        autoComplete="email"
+                        placeholder="You are a helpful assistant for..."
+                        className="h-24"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -169,21 +170,74 @@ export default function CreateOrganization() {
                 />
 
                 <Controller
-                  name="address"
+                  name="welcomeMessage"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="address">Address</FieldLabel>
-                      <Textarea
+                      <FieldLabel htmlFor="welcomeMessage">
+                        Welcome Message{" "}
+                        <span className="text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FieldLabel>
+                      <Input
                         {...field}
-                        id="address"
+                        id="welcomeMessage"
                         disabled={loading}
                         aria-invalid={fieldState.invalid}
-                        placeholder="123 Main St, New York, NY 10856"
+                        placeholder="Hi! How can I help you today?"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="isActive"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <FieldLabel htmlFor="isActive">Active</FieldLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Widget will be visible on your website
+                          </p>
+                        </div>
+                        <Switch
+                          id="isActive"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={loading}
+                        />
+                      </div>
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="requirePreChat"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <FieldLabel htmlFor="requirePreChat">
+                            Require Pre-chat Form
+                          </FieldLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Ask visitor for name and email before chatting
+                          </p>
+                        </div>
+                        <Switch
+                          id="requirePreChat"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={loading}
+                        />
+                      </div>
                     </Field>
                   )}
                 />

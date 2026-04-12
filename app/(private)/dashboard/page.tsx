@@ -13,8 +13,19 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ChatBotIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import {
+  BriefcaseIcon,
+  ChatBotIcon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
 import { Separator } from "@/components/ui/separator";
+import CreateOrganization from "../components/create-organization";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -27,7 +38,11 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col">
-        <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
+          <CreateOrganization />
+        </div>
+        <p className="text-md text-muted-foreground">Description</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {memberships.map((m) => (
@@ -35,28 +50,36 @@ export default async function DashboardPage() {
             <Card className="hover:shadow-md transition duration-300 hover:cursor-pointer hover:bg-primary/3">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle>{m.organization.name}</CardTitle>
+                  <CardTitle className="flex items-center gap-1">
+                    <HugeiconsIcon icon={BriefcaseIcon} />
+                    {m.organization.name}
+                  </CardTitle>
                   <Badge
-                    className={`ml-6 capitalize ${m.role === "owner" ? "bg-emerald-500" : "bg-primary"}`}
+                    className={`ml-6 capitalize ${m.role === "owner" ? "bg-emerald-500" : "bg-muted text-muted-foreground"}`}
                   >
                     {m.role}
                   </Badge>
                 </div>
                 <CardDescription>{m.organization.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex justify-center gap-3">
-                <p className="flex items-center gap-3">
-                  <HugeiconsIcon icon={ChatBotIcon} />x
-                </p>
+              <CardContent className="flex items-center gap-3">
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-3">
+                    <HugeiconsIcon icon={UserGroupIcon} />x
+                  </TooltipTrigger>
+                  <TooltipContent>Total of Member&apos;s</TooltipContent>
+                </Tooltip>
                 <Separator orientation="vertical" />
-                <p className="flex items-center gap-3">
-                  <HugeiconsIcon icon={UserGroupIcon} />x
-                </p>
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-3">
+                    <HugeiconsIcon icon={ChatBotIcon} />x
+                  </TooltipTrigger>
+                  <TooltipContent>Total of Chatbot&apos;s</TooltipContent>
+                </Tooltip>
               </CardContent>
             </Card>
           </Link>
         ))}
-        {session.user.id}
       </div>
     </div>
   );

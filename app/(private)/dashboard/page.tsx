@@ -1,18 +1,17 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { signOut, useSession } from "next-auth/react";
+import CreateOrganization from "../components/create-organization";
+import OrganizationList from "../components/organization-list";
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-
   return (
     <>
-      <div className="flex flex-col">
-        <p>ID: {session?.user.id}</p>
-        <p>Email: {session?.user?.email}</p>
-        <p>Username: {session?.user.username}</p>
-        <Button onClick={() => signOut({ callbackUrl: "/" })}>Sign Out</Button>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col">
+          <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <OrganizationList />
+          <CreateOrganization />
+        </div>
       </div>
     </>
   );

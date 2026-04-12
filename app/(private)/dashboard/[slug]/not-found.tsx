@@ -20,8 +20,5 @@ export default function NotFound() {
         </Button>
       </div>
     </div>
-    // <div className="grid grid-cols-1 place-items-center gap-3">
-
-    // </div>
   );
 }

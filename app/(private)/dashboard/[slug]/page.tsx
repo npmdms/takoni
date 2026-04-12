@@ -23,7 +23,12 @@ import {
 } from "@/components/ui/tooltip";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Separator } from "@/components/ui/separator";
-import { ChatBotIcon, EyeIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowRightIcon,
+  ChatBotIcon,
+  EyeIcon,
+} from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -62,39 +67,46 @@ export default async function OrganizationPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No chatbots yet.</p>
         ) : (
           chatbots.map((c) => (
-            <Link key={c._id} href={`/dashboard/${slug}/${c.slug}`}>
-              <Card className="hover:shadow-md transition duration-300 hover:cursor-pointer hover:bg-primary/3">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="flex items-center gap-1">
-                      <HugeiconsIcon icon={ChatBotIcon} />
-                      {c.name}
-                    </CardTitle>
-                    <Badge
-                      className={`ml-6 capitalize ${c.isActive ? "bg-emerald-500" : "bg-muted text-muted-foreground"}`}
-                    >
-                      {c.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  <CardDescription>{c.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center gap-3">
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-3">
-                      <HugeiconsIcon icon={EyeIcon} />x
-                    </TooltipTrigger>
-                    <TooltipContent>Total of X&apos;s</TooltipContent>
-                  </Tooltip>
-                  <Separator orientation="vertical" />
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-3">
-                      <HugeiconsIcon icon={EyeIcon} />x
-                    </TooltipTrigger>
-                    <TooltipContent>Total of Y&apos;s</TooltipContent>
-                  </Tooltip>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card
+              key={c._id}
+              className="hover:shadow-md transition duration-300 hover:bg-primary/3"
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <CardTitle className="flex items-center gap-1">
+                    <HugeiconsIcon icon={ChatBotIcon} />
+                    {c.name}
+                  </CardTitle>
+                  <Badge
+                    className={`ml-6 capitalize ${c.isActive ? "bg-emerald-500" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {c.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <CardDescription>{c.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center gap-3">
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-3">
+                    <HugeiconsIcon icon={EyeIcon} />x
+                  </TooltipTrigger>
+                  <TooltipContent>Total of X&apos;s</TooltipContent>
+                </Tooltip>
+                <Separator orientation="vertical" />
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-3">
+                    <HugeiconsIcon icon={EyeIcon} />x
+                  </TooltipTrigger>
+                  <TooltipContent>Total of Y&apos;s</TooltipContent>
+                </Tooltip>
+                <Button asChild>
+                  <Link href={`/dashboard/${slug}/${c.slug}`}>
+                    <HugeiconsIcon icon={ArrowRightIcon} />
+                    Enter
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           ))
         )}
       </div>

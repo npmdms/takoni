@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -96,7 +96,7 @@ export default function CreateChatbot({ organizationId, slug }: Props) {
           <SheetHeader>
             <SheetTitle>Add Chatbot</SheetTitle>
             <SheetDescription>Please fill out</SheetDescription>
-            <Separator />
+            <Separator className="my-3" />
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-1"
@@ -243,7 +243,7 @@ export default function CreateChatbot({ organizationId, slug }: Props) {
                 />
 
                 {serverError && (
-                  <p className="text-sm text-destructive text-balance flex items-center gap-1">
+                  <p className="text-sm text-destructive text-balance flex items-center gap-1 py-3">
                     <HugeiconsIcon icon={Alert02Icon} />
                     {serverError}
                   </p>

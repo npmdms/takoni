@@ -38,9 +38,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { EditIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, EditIcon } from "@hugeicons/core-free-icons";
 
 interface Props {
+  disabled?: boolean;
   organization: {
     id: string;
     name: string;
@@ -50,7 +51,7 @@ interface Props {
   };
 }
 
-export default function EditOrganization({ organization }: Props) {
+export default function EditOrganization({ disabled, organization }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -118,159 +119,161 @@ export default function EditOrganization({ organization }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild disabled={disabled}>
         <Button variant={"outline"}>
           <HugeiconsIcon icon={EditIcon} />
           Edit
         </Button>
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="overflow-y-auto pb-24">
         <SheetHeader>
           <SheetTitle>Edit Organization</SheetTitle>
           <SheetDescription>Update your organization details.</SheetDescription>
-          <Separator />
-        </SheetHeader>
+          <Separator className="my-3" />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-1"
+          >
+            <FieldGroup>
+              <Controller
+                name="name"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="name">Name</FieldLabel>
+                    <Input
+                      {...field}
+                      id="name"
+                      disabled={loading}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Organization name"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 px-4 py-4"
-        >
-          <FieldGroup>
-            <Controller
-              name="name"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="name">Name</FieldLabel>
-                  <Input
-                    {...field}
-                    id="name"
-                    disabled={loading}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Organization name"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              <Controller
+                name="description"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="description">
+                      Description{" "}
+                      <span className="text-muted-foreground">(optional)</span>
+                    </FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="description"
+                      disabled={loading}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="What does your organization do?"
+                      className="h-24"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-            <Controller
-              name="description"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="description">
-                    Description{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </FieldLabel>
-                  <Textarea
-                    {...field}
-                    id="description"
-                    disabled={loading}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="What does your organization do?"
-                    className="h-24"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              <Controller
+                name="supportEmail"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="supportEmail">
+                      Support Email{" "}
+                      <span className="text-muted-foreground">(optional)</span>
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="supportEmail"
+                      type="email"
+                      disabled={loading}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="support@example.com"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-            <Controller
-              name="supportEmail"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="supportEmail">
-                    Support Email{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id="supportEmail"
-                    type="email"
-                    disabled={loading}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="support@example.com"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              <Controller
+                name="address"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="address">
+                      Address{" "}
+                      <span className="text-muted-foreground">(optional)</span>
+                    </FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="address"
+                      disabled={loading}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Jl. ..."
+                      className="h-20"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
 
-            <Controller
-              name="address"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="address">
-                    Address{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </FieldLabel>
-                  <Textarea
-                    {...field}
-                    id="address"
-                    disabled={loading}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Jl. ..."
-                    className="h-20"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
+            {serverError && (
+              <p className="text-sm text-destructive text-balance flex items-center gap-1 py-3">
+                <HugeiconsIcon icon={Alert02Icon} />
+                {serverError}
+              </p>
+            )}
 
-          {serverError && (
-            <p className="text-sm text-destructive">{serverError}</p>
-          )}
-
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
-
-          <Separator />
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="destructive"
-                className="w-full"
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete Organization"}
+            <div className="flex flex-col gap-3 pt-3">
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? "Saving..." : "Save Changes"}
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete{" "}
-                  <span className="font-medium">{organization.name}</span> and
-                  all its chatbots. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={onDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </form>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="w-full"
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting..." : "Delete Organization"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete{" "}
+                      <span className="font-medium">{organization.name}</span>{" "}
+                      and all its chatbots. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={onDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </form>
+        </SheetHeader>
       </SheetContent>
     </Sheet>
   );

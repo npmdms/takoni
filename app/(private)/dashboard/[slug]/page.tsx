@@ -75,12 +75,12 @@ export default async function OrganizationPage({ params }: Props) {
             <CardContent className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
                 <small className="text-muted-foreground">Welcome Message</small>
-                <p>{c.welcomeMessage}</p>
+                <p>{c.welcomeMessage || "None"}</p>
               </div>
               <Separator className="md:hidden" orientation="vertical" />
               <div className="flex flex-col gap-1">
                 <small className="text-muted-foreground">System Prompt</small>
-                <p>{c.systemPrompt}</p>
+                <p>{c.systemPrompt || "None"}</p>
               </div>
               <div className="flex flex-col gap-1">
                 <small className="text-muted-foreground">Prechat Form</small>

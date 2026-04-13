@@ -9,6 +9,8 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
@@ -55,6 +57,18 @@ export default async function ChatbotPage({ params }: Props) {
         <p className="text-md text-muted-foreground">
           {chatbot.description || "No description"}
         </p>
+        <div className="flex items-center gap-3">
+          <Button className="w-fit" asChild>
+            <Link href={`/dashboard/${slug}/${chatbotSlug}/knowledge`}>
+              Knowledge Base
+            </Link>
+          </Button>
+          <Button className="w-fit" asChild>
+            <Link href={`/dashboard/${slug}/${chatbotSlug}/preview`}>
+              Preview
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Separator />

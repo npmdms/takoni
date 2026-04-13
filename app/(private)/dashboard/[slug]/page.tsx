@@ -21,7 +21,6 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowRightIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import EditChatbot from "../../components/edit-chatbot";
-import CreateKnowledge from "../../components/create-knowledge";
 
 interface Props {
   params: Promise<{ slug: string }>;

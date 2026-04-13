@@ -36,10 +36,12 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import CreateKnowledge from "../create-knowledge";
+import EditKnowledge from "../edit-knowledge";
 
 interface Knowledge {
   id: string;
   title: string;
+  content: string;
   category: string;
   tags?: string[];
   isActive: boolean;
@@ -58,6 +60,13 @@ export default function KnowledgeTable({
   chatbotId,
 }: Props) {
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Knowledge | null>(null);
+  const [open, setOpen] = useState(false);
+
+  function onEdit(knowledge: Knowledge) {
+    setSelected(knowledge);
+    setOpen(true);
+  }
 
   const columns: ColumnDef<Knowledge>[] = useMemo(
     () => [
@@ -134,19 +143,19 @@ export default function KnowledgeTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => console.log("edit", row.original.id)}
+              onClick={() => onEdit(row.original)}
             >
               <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
               Edit
             </Button>
-            <Button
+            {/* <Button
               variant="destructive"
               size="sm"
               onClick={() => console.log("delete", row.original.id)}
             >
               <HugeiconsIcon icon={Delete02Icon} size={16} />
               Delete
-            </Button>
+            </Button> */}
           </div>
         ),
       },
@@ -295,14 +304,18 @@ export default function KnowledgeTable({
                     </span>
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button variant={"outline"} size={"sm"}>
-                      <HugeiconsIcon icon={EditIcon} />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(k)}
+                    >
+                      <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
                       Edit
                     </Button>
-                    <Button variant={"destructive"} size={"sm"}>
+                    {/* <Button variant={"destructive"} size={"sm"}>
                       <HugeiconsIcon icon={DeleteIcon} />
                       Delete
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </CardContent>
@@ -310,6 +323,15 @@ export default function KnowledgeTable({
           ))
         )}
       </div>
+      {selected && (
+        <EditKnowledge
+          open={open}
+          onOpenChange={setOpen}
+          organizationId={organizationId}
+          chatbotId={chatbotId}
+          knowledge={selected}
+        />
+      )}
     </div>
   );
 }

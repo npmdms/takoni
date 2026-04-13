@@ -2,19 +2,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Organization } from "@/models/Organization";
-import { Membership } from "@/models/Membership";
 import { Chatbot } from "@/models/Chatbot";
-import { updateOrganizationSchema } from "@/lib/validation/organization";
-import slugify from "slugify";
 import { Knowledge } from "@/models/Knowledge";
+import { Membership } from "@/models/Membership";
+import { createKnowledgeSchema } from "@/lib/validation/knowledge";
 
 interface Props {
-  params: Promise<{ organizationId: string }>;
+  params: Promise<{
+    organizationId: string;
+    chatbotId: string;
+    knowledgeId: string;
+  }>;
 }
 
 export async function PATCH(req: NextRequest, { params }: Props) {
-  const { organizationId } = await params;
+  const { organizationId, chatbotId, knowledgeId } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session)
@@ -26,13 +28,19 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     const membership = await Membership.findOne({
       user: session.user.id,
       organization: organizationId,
-      role: "owner",
-    });
+    }).lean();
     if (!membership)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+    const chatbot = await Chatbot.findOne({
+      _id: chatbotId,
+      organization: organizationId,
+    }).lean();
+    if (!chatbot)
+      return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+
     const body = await req.json();
-    const parsed = updateOrganizationSchema.safeParse(body);
+    const parsed = createKnowledgeSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
@@ -40,35 +48,27 @@ export async function PATCH(req: NextRequest, { params }: Props) {
       );
     }
 
-    const { name, description, supportEmail, address } = parsed.data;
-    const slug = slugify(name, { lower: true, strict: true });
-
-    const existing = await Organization.findOne({
-      slug,
-      _id: { $ne: organizationId },
-    });
-    if (existing) {
-      return NextResponse.json(
-        { error: "Organization name already taken" },
-        { status: 409 },
-      );
-    }
-
-    const org = await Organization.findByIdAndUpdate(
-      organizationId,
-      { name, slug, description, supportEmail, address },
+    const knowledge = await Knowledge.findOneAndUpdate(
+      { _id: knowledgeId, chatbot: chatbotId },
+      { ...parsed.data },
       { new: true },
     ).lean();
 
-    return NextResponse.json(org, { status: 200 });
+    if (!knowledge)
+      return NextResponse.json(
+        { error: "Knowledge not found" },
+        { status: 404 },
+      );
+
+    return NextResponse.json(knowledge, { status: 200 });
   } catch (error) {
-    console.error("[organization PATCH]", error);
+    console.error("[knowledge PATCH]", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: Props) {
-  const { organizationId } = await params;
+  const { organizationId, chatbotId, knowledgeId } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session)
@@ -80,29 +80,31 @@ export async function DELETE(req: NextRequest, { params }: Props) {
     const membership = await Membership.findOne({
       user: session.user.id,
       organization: organizationId,
-      role: "owner",
-    });
+    }).lean();
     if (!membership)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const chatbots = await Chatbot.find({
+    const chatbot = await Chatbot.findOne({
+      _id: chatbotId,
       organization: organizationId,
     }).lean();
+    if (!chatbot)
+      return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
 
-    const chatbotIds = chatbots.map((c) => c._id);
+    const knowledge = await Knowledge.findOneAndDelete({
+      _id: knowledgeId,
+      chatbot: chatbotId,
+    }).lean();
 
-    await Knowledge.deleteMany({ chatbot: { $in: chatbotIds } });
-    
-    await Chatbot.deleteMany({ organization: organizationId });
-
-    await Membership.deleteMany({ organization: organizationId });
-
-
-    await Organization.findByIdAndDelete(organizationId);
+    if (!knowledge)
+      return NextResponse.json(
+        { error: "Knowledge not found" },
+        { status: 404 },
+      );
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("[organization DELETE]", error);
+    console.error("[knowledge DELETE]", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

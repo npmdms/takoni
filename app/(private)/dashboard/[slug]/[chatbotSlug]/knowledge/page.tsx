@@ -44,6 +44,7 @@ export default async function KnowledgePage({ params }: Props) {
   const data = knowledge.map((k) => ({
     id: String(k._id),
     title: k.title,
+    content: k.content,
     category: k.category,
     tags: k.tags,
     isActive: k.isActive,

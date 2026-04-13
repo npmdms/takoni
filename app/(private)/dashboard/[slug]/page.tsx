@@ -102,10 +102,6 @@ export default async function OrganizationPage({ params }: Props) {
                     requirePreChat: c.requirePreChat,
                   }}
                 />
-                <CreateKnowledge
-                  organizationId={String(org._id)}
-                  chatbotId={String(c._id)}
-                />
                 <Button asChild>
                   <Link href={`/dashboard/${slug}/${c.slug}`}>
                     <HugeiconsIcon icon={ArrowRightIcon} />

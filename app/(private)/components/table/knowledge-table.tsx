@@ -35,6 +35,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import CreateKnowledge from "../create-knowledge";
 
 interface Knowledge {
   id: string;
@@ -64,7 +65,9 @@ export default function KnowledgeTable({
         accessorKey: "title",
         header: "Title",
         cell: ({ row }) => (
-          <span className="font-medium">{row.getValue("title")}</span>
+          <span className="font-medium max-w-xs truncate block">
+            {row.getValue("title")}
+          </span>
         ),
       },
       {
@@ -125,22 +128,24 @@ export default function KnowledgeTable({
       },
       {
         id: "actions",
-        header: "",
+        header: "Actions",
         cell: ({ row }) => (
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center gap-3">
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               onClick={() => console.log("edit", row.original.id)}
             >
               <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
+              Edit
             </Button>
             <Button
-              variant="ghost"
-              size="icon"
+              variant="destructive"
+              size="sm"
               onClick={() => console.log("delete", row.original.id)}
             >
               <HugeiconsIcon icon={Delete02Icon} size={16} />
+              Delete
             </Button>
           </div>
         ),
@@ -168,18 +173,24 @@ export default function KnowledgeTable({
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative max-w-xs">
-        <HugeiconsIcon
-          icon={SearchIcon}
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          placeholder="Search knowledge..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-row justify-between items-center">
+        <div className="relative max-w-xs">
+          <HugeiconsIcon
+            icon={SearchIcon}
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            placeholder="Search knowledge..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <CreateKnowledge
+          organizationId={organizationId}
+          chatbotId={chatbotId}
         />
       </div>
 
@@ -204,7 +215,7 @@ export default function KnowledgeTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center text-muted-foreground py-10"
+                  className="text-center text-muted-foreground py-6"
                 >
                   {search ? "No results found." : "No knowledge added yet."}
                 </TableCell>
@@ -229,27 +240,32 @@ export default function KnowledgeTable({
 
       <div className="flex flex-col gap-3 md:hidden">
         {filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-10">
+          <p className="text-sm text-muted-foreground text-center py-6">
             {search ? "No results found." : "No knowledge added yet."}
           </p>
         ) : (
           filtered.map((k) => (
             <Card key={k.id}>
               <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>{k.title}</CardTitle>
-                  <Badge
-                    className={
-                      k.isActive
-                        ? "bg-emerald-500"
-                        : "bg-muted text-muted-foreground"
-                    }
-                  >
-                    {k.isActive ? "Active" : "Inactive"}
-                  </Badge>
+                <div className="grid grid-cols-4 gap-3">
+                  <CardTitle className="col-span-3">{k.title}</CardTitle>
+                  <div className="flex justify-end">
+                    <Badge
+                      className={`
+                      ${
+                        k.isActive
+                          ? "bg-emerald-500"
+                          : "bg-muted text-muted-foreground"
+                      }
+                    `}
+                    >
+                      {k.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
                 </div>
-                <CardDescription className="capitalize">
-                  {k.category}
+                <CardDescription className="capitalize text-foreground">
+                  Category:{" "}
+                  <span className="text-muted-foreground">{k.category}</span>
                 </CardDescription>
               </CardHeader>
               <Separator />

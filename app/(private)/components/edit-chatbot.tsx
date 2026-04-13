@@ -39,7 +39,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, EditIcon } from "@hugeicons/core-free-icons";
 
 interface Props {
   chatbot: {
@@ -128,7 +128,8 @@ export default function EditChatbot({ chatbot }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={EditIcon} />
           Edit
         </Button>
       </SheetTrigger>

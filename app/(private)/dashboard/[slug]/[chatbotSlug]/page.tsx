@@ -39,26 +39,22 @@ export default async function ChatbotPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl md:text-2xl">{chatbot.name}</h1>
-            <Badge
-              className={
-                chatbot.isActive
-                  ? "bg-emerald-500"
-                  : "bg-muted text-muted-foreground"
-              }
-            >
-              {chatbot.isActive ? "Active" : "Inactive"}
-            </Badge>
-          </div>
-          {chatbot.description && (
-            <p className="text-sm text-muted-foreground">
-              {chatbot.description}
-            </p>
-          )}
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl md:text-2xl">{chatbot.name}</h1>
+          <Badge
+            className={
+              chatbot.isActive
+                ? "bg-emerald-500"
+                : "bg-muted text-muted-foreground"
+            }
+          >
+            {chatbot.isActive ? "Active" : "Inactive"}
+          </Badge>
         </div>
+        <p className="text-md text-muted-foreground">
+          {chatbot.description || "No description"}
+        </p>
       </div>
 
       <Separator />

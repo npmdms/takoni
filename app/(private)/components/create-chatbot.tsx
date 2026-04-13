@@ -2,6 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Field,
   FieldError,
   FieldGroup,
@@ -87,14 +93,20 @@ export default function CreateChatbot({ organizationId, slug }: Props) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button>
-            <HugeiconsIcon icon={AddIcon} />
-            Add Chatbot
-          </Button>
+          <Card className="hover:shadow-md transition duration-300 hover:cursor-pointer hover:bg-primary/3">
+            <CardHeader className="flex flex-col justify-center items-center text-center h-full">
+              <HugeiconsIcon icon={AddIcon} size={36} />
+              <CardTitle>Create Chatbot</CardTitle>
+              <CardDescription>
+                Create a new chatbot to handle customer conversations, answer
+                questions, and automate support for your organization.
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </SheetTrigger>
         <SheetContent className="overflow-y-auto pb-24">
           <SheetHeader>
-            <SheetTitle>Add Chatbot</SheetTitle>
+            <SheetTitle>Create Chatbot</SheetTitle>
             <SheetDescription>Please fill out</SheetDescription>
             <Separator className="my-3" />
             <form

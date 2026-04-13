@@ -120,7 +120,7 @@ export default function EditOrganization({ disabled, organization }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild disabled={disabled}>
-        <Button variant={"outline"}>
+        <Button variant={"outline"} size={"sm"}>
           <HugeiconsIcon icon={EditIcon} />
           Edit
         </Button>

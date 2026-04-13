@@ -90,7 +90,7 @@ export default function CreateOrganization() {
           <Card className="hover:shadow-md transition duration-300 hover:cursor-pointer hover:bg-primary/3">
             <CardHeader className="flex flex-col justify-center items-center text-center h-full">
               <HugeiconsIcon icon={AddIcon} size={36} />
-              <CardTitle>Add Organization</CardTitle>
+              <CardTitle>Create Organization</CardTitle>
               <CardDescription>
                 Create a new organization to manage your chatbots, team members,
                 and customer conversations.
@@ -100,7 +100,7 @@ export default function CreateOrganization() {
         </SheetTrigger>
         <SheetContent className="overflow-y-auto pb-24">
           <SheetHeader>
-            <SheetTitle>Add Organization</SheetTitle>
+            <SheetTitle>Create Organization</SheetTitle>
             <SheetDescription>Please fill out</SheetDescription>
             <Separator className="my-3" />
             <form

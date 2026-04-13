@@ -30,11 +30,10 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
-        </div>
+        <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
         <p className="text-md text-muted-foreground">Description</p>
       </div>
+      <Separator />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <CreateOrganization />
         {memberships.map((m) => (

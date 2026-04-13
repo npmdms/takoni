@@ -39,7 +39,6 @@ export default async function ChatbotPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
@@ -64,7 +63,6 @@ export default async function ChatbotPage({ params }: Props) {
 
       <Separator />
 
-      {/* Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>

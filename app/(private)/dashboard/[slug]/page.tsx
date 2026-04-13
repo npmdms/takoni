@@ -29,6 +29,7 @@ import {
   EyeIcon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
+import EditChatbot from "../../components/edit-chatbot";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -99,6 +100,18 @@ export default async function OrganizationPage({ params }: Props) {
                   </TooltipTrigger>
                   <TooltipContent>Total of Y&apos;s</TooltipContent>
                 </Tooltip>
+                <EditChatbot
+                  chatbot={{
+                    id: String(c._id),
+                    organizationId: String(org._id),
+                    name: c.name,
+                    description: c.description,
+                    systemPrompt: c.systemPrompt,
+                    welcomeMessage: c.welcomeMessage,
+                    isActive: c.isActive,
+                    requirePreChat: c.requirePreChat,
+                  }}
+                />
                 <Button asChild>
                   <Link href={`/dashboard/${slug}/${c.slug}`}>
                     <HugeiconsIcon icon={ArrowRightIcon} />

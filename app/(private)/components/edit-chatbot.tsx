@@ -1,15 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
   SheetContent,
@@ -29,58 +25,61 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  updateOrganizationSchema,
-  UpdateOrganizationValues,
-} from "@/lib/validation/organization";
+import { updateChatbotSchema, UpdateChatbotValues } from "@/lib/validation/chatbot";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { EditIcon } from "@hugeicons/core-free-icons";
 
 interface Props {
-  organization: {
+  chatbot: {
     id: string;
+    organizationId: string;
     name: string;
     description?: string;
-    supportEmail?: string;
-    address?: string;
+    systemPrompt?: string;
+    welcomeMessage?: string;
+    isActive: boolean;
+    requirePreChat: boolean;
   };
 }
 
-export default function EditOrganization({ organization }: Props) {
+export default function EditChatbot({ chatbot }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
 
-  const form = useForm<UpdateOrganizationValues>({
-    resolver: zodResolver(updateOrganizationSchema),
+  const form = useForm<UpdateChatbotValues>({
+    resolver: zodResolver(updateChatbotSchema),
     defaultValues: {
-      name: organization.name,
-      description: organization.description ?? "",
-      supportEmail: organization.supportEmail ?? "",
-      address: organization.address ?? "",
+      name: chatbot.name,
+      description: chatbot.description ?? "",
+      systemPrompt: chatbot.systemPrompt ?? "",
+      welcomeMessage: chatbot.welcomeMessage ?? "",
+      isActive: chatbot.isActive,
+      requirePreChat: chatbot.requirePreChat,
     },
   });
 
-  async function onSubmit(values: UpdateOrganizationValues) {
+  async function onSubmit(values: UpdateChatbotValues) {
     setLoading(true);
     setServerError(null);
 
     try {
-      const res = await fetch(`/api/organizations/${organization.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const res = await fetch(
+        `/api/organizations/${chatbot.organizationId}/chatbots/${chatbot.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) {
-        setServerError(data.error ?? "Failed to update organization");
+        setServerError(data.error ?? "Failed to update chatbot");
         return;
       }
 
@@ -96,18 +95,18 @@ export default function EditOrganization({ organization }: Props) {
   async function onDelete() {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/organizations/${organization.id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/organizations/${chatbot.organizationId}/chatbots/${chatbot.id}`,
+        { method: "DELETE" }
+      );
 
       if (!res.ok) {
         const data = await res.json();
-        setServerError(data.error ?? "Failed to delete organization");
+        setServerError(data.error ?? "Failed to delete chatbot");
         return;
       }
 
       setOpen(false);
-      router.push("/dashboard");
       router.refresh();
     } catch {
       setServerError("Unable to connect. Please try again.");
@@ -119,15 +118,12 @@ export default function EditOrganization({ organization }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant={"outline"}>
-          <HugeiconsIcon icon={EditIcon} />
-          Edit
-        </Button>
+        <Button variant="ghost" size="sm">Edit</Button>
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Edit Organization</SheetTitle>
-          <SheetDescription>Update your organization details.</SheetDescription>
+          <SheetTitle>Edit Chatbot</SheetTitle>
+          <SheetDescription>Update your chatbot settings.</SheetDescription>
           <Separator />
         </SheetHeader>
 
@@ -147,7 +143,7 @@ export default function EditOrganization({ organization }: Props) {
                     id="name"
                     disabled={loading}
                     aria-invalid={fieldState.invalid}
-                    placeholder="Organization name"
+                    placeholder="e.g. Support Bot"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -170,7 +166,7 @@ export default function EditOrganization({ organization }: Props) {
                     id="description"
                     disabled={loading}
                     aria-invalid={fieldState.invalid}
-                    placeholder="What does your organization do?"
+                    placeholder="What does this chatbot do?"
                     className="h-24"
                   />
                   {fieldState.invalid && (
@@ -181,21 +177,21 @@ export default function EditOrganization({ organization }: Props) {
             />
 
             <Controller
-              name="supportEmail"
+              name="systemPrompt"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="supportEmail">
-                    Support Email{" "}
+                  <FieldLabel htmlFor="systemPrompt">
+                    System Prompt{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
-                  <Input
+                  <Textarea
                     {...field}
-                    id="supportEmail"
-                    type="email"
+                    id="systemPrompt"
                     disabled={loading}
                     aria-invalid={fieldState.invalid}
-                    placeholder="support@example.com"
+                    placeholder="You are a helpful assistant for..."
+                    className="h-24"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -205,25 +201,72 @@ export default function EditOrganization({ organization }: Props) {
             />
 
             <Controller
-              name="address"
+              name="welcomeMessage"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="address">
-                    Address{" "}
+                  <FieldLabel htmlFor="welcomeMessage">
+                    Welcome Message{" "}
                     <span className="text-muted-foreground">(optional)</span>
                   </FieldLabel>
-                  <Textarea
+                  <Input
                     {...field}
-                    id="address"
+                    id="welcomeMessage"
                     disabled={loading}
                     aria-invalid={fieldState.invalid}
-                    placeholder="Jl. ..."
-                    className="h-20"
+                    placeholder="Hi! How can I help you today?"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="isActive"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                      <FieldLabel htmlFor="isActive">Active</FieldLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Widget will be visible on your website
+                      </p>
+                    </div>
+                    <Switch
+                      id="isActive"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading}
+                    />
+                  </div>
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="requirePreChat"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                      <FieldLabel htmlFor="requirePreChat">
+                        Require Pre-chat Form
+                      </FieldLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Ask visitor for name and email before chatting
+                      </p>
+                    </div>
+                    <Switch
+                      id="requirePreChat"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading}
+                    />
+                  </div>
                 </Field>
               )}
             />
@@ -247,7 +290,7 @@ export default function EditOrganization({ organization }: Props) {
                 className="w-full"
                 disabled={deleting}
               >
-                {deleting ? "Deleting..." : "Delete Organization"}
+                {deleting ? "Deleting..." : "Delete Chatbot"}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -255,8 +298,8 @@ export default function EditOrganization({ organization }: Props) {
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently delete{" "}
-                  <span className="font-medium">{organization.name}</span> and
-                  all its chatbots. This action cannot be undone.
+                  <span className="font-medium">{chatbot.name}</span> and all
+                  its data. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

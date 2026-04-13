@@ -46,6 +46,23 @@ export default async function DashboardPage() {
         </div>
         <p className="text-md text-muted-foreground">Description</p>
       </div>
+      <div className="grid grid-cols-1 gap-6">
+        {memberships.map((m) => (
+          <Card key={m._id}>
+            <CardHeader>
+              <CardTitle>
+                {m.organization.name}
+              </CardTitle>
+              <CardDescription>
+                {m.organization.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Halo</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {memberships.map((m) => (
           <Card

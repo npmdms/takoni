@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { Membership } from "@/models/Membership";
 import { Chatbot } from "@/models/Chatbot";
+import { Knowledge } from "@/models/Knowledge";
 import { updateChatbotSchema } from "@/lib/validation/chatbot";
 import slugify from "slugify";
 
@@ -80,7 +81,15 @@ export async function DELETE(req: NextRequest, { params }: Props) {
     });
     if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    await Chatbot.findByIdAndDelete(chatbotId);
+    const chatbot = await Chatbot.findOneAndDelete({
+      _id: chatbotId,
+      organization: organizationId,
+    });
+    if (!chatbot) {
+      return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+    }
+
+    await Knowledge.deleteMany({ chatbot: chatbotId });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

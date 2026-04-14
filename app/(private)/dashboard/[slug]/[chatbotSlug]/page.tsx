@@ -12,7 +12,12 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { BookIcon, EyeIcon } from "@hugeicons/core-free-icons";
+import {
+  BookIcon,
+  EyeIcon,
+  PaintBrush02Icon,
+} from "@hugeicons/core-free-icons";
+import { Knowledge } from "@/models/Knowledge";
 
 interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
@@ -41,34 +46,105 @@ export default async function ChatbotPage({ params }: Props) {
   }).lean();
   if (!chatbot) notFound();
 
+  const knowledgeCount = await Knowledge.countDocuments({ chatbot: chatbot._id });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col">
-          <h1 className="text-xl md:text-2xl">{chatbot.name}</h1>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl md:text-2xl">{chatbot.name}</h1>
+            <Badge variant={chatbot.isActive ? "default" : "secondary"}>
+              {chatbot.isActive ? "Active" : "Inactive"}
+            </Badge>
+          </div>
           <p className="text-md text-muted-foreground">
-            Configure knowledge base, and appearance of your chatbots.
+            Overview of your chatbot configuration, content readiness, and quick
+            actions.
           </p>
-        </div>
-        <div className="flex flex-row flex-wrap gap-3">
-          <Button variant={"outline"} className="w-fit" asChild>
-            <Link href={`/dashboard/${slug}/${chatbotSlug}/knowledge`}>
-              <HugeiconsIcon icon={BookIcon} />
-              Knowledge Base
-            </Link>
-          </Button>
-          <Button variant={"outline"} className="w-fit" asChild>
-            <Link href={`/dashboard/${slug}/${chatbotSlug}/preview`}>
-              <HugeiconsIcon icon={EyeIcon} />
-              Preview
-            </Link>
-          </Button>
         </div>
       </div>
 
       <Separator />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Navigation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Button variant={"outline"} className="justify-start" asChild>
+              <Link href={`/dashboard/${slug}/${chatbotSlug}/knowledge`}>
+                <HugeiconsIcon icon={BookIcon} />
+                Knowledge Base
+              </Link>
+            </Button>
+            <Button variant={"outline"} className="justify-start" asChild>
+              <Link href={`/dashboard/${slug}/${chatbotSlug}/preview`}>
+                <HugeiconsIcon icon={EyeIcon} />
+                Preview
+              </Link>
+            </Button>
+            <Button variant={"outline"} className="justify-start" asChild>
+              <Link href={`/dashboard/${slug}/${chatbotSlug}/appearance`}>
+                <HugeiconsIcon icon={PaintBrush02Icon} />
+                Appearance
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Knowledge Base
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">{knowledgeCount}</p>
+            <p className="text-sm text-muted-foreground">
+              {knowledgeCount === 1 ? "Document" : "Documents"} available
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Pre-chat Form
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-medium">
+              {chatbot.requirePreChat ? "Enabled" : "Disabled"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {chatbot.requirePreChat
+                ? "Visitors will fill details before chatting."
+                : "Visitors can start chatting immediately."}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Description
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">
+              {chatbot.description?.trim() ? (
+                chatbot.description
+              ) : (
+                <span className="text-muted-foreground italic">Not set</span>
+              )}
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-muted-foreground">
@@ -102,13 +178,11 @@ export default async function ChatbotPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-muted-foreground">
-              Pre-chat Form
+              Slug
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm">
-              {chatbot.requirePreChat ? "Enabled" : "Disabled"}
-            </p>
+            <p className="text-sm font-mono">{chatbot.slug}</p>
           </CardContent>
         </Card>
 
@@ -121,6 +195,23 @@ export default async function ChatbotPage({ params }: Props) {
           <CardContent>
             <p className="text-sm">
               {new Date(chatbot.createdAt).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Last Updated
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">
+              {new Date(chatbot.updatedAt).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",

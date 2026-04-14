@@ -13,6 +13,27 @@ interface Props {
   params: Promise<{ organizationId: string }>;
 }
 
+async function generateUniqueOrganizationSlug(
+  name: string,
+  organizationId?: string,
+) {
+  const base = slugify(name, { lower: true, strict: true });
+  let slug = base;
+  let counter = 1;
+
+  while (
+    await Organization.exists({
+      slug,
+      ...(organizationId ? { _id: { $ne: organizationId } } : {}),
+    })
+  ) {
+    slug = `${base}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+}
+
 export async function PATCH(req: NextRequest, { params }: Props) {
   const { organizationId } = await params;
 
@@ -41,18 +62,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     }
 
     const { name, description, supportEmail, address } = parsed.data;
-    const slug = slugify(name, { lower: true, strict: true });
-
-    const existing = await Organization.findOne({
-      slug,
-      _id: { $ne: organizationId },
-    });
-    if (existing) {
-      return NextResponse.json(
-        { error: "Organization name already taken" },
-        { status: 409 },
-      );
-    }
+    const slug = await generateUniqueOrganizationSlug(name, organizationId);
 
     const org = await Organization.findByIdAndUpdate(
       organizationId,

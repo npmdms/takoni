@@ -47,13 +47,15 @@ export default async function OrganizationPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col">
-        <h1 className="text-xl md:text-2xl">{org.name}</h1>
-        <p className="text-md text-muted-foreground">Description</p>
+      <div className="flex justify-between items-end">
+        <div className="flex flex-col">
+          <h1 className="text-xl md:text-2xl">{org.name}</h1>
+          <p className="text-md text-muted-foreground">Overview of your chatbots.</p>
+        </div>
+        <CreateChatbot organizationId={String(org._id)} slug={slug} />
       </div>
       <Separator />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <CreateChatbot organizationId={String(org._id)} slug={slug} />
         {chatbots.map((c) => (
           <Card key={c._id}>
             <CardHeader>

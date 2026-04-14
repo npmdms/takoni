@@ -29,13 +29,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col">
-        <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
-        <p className="text-md text-muted-foreground">Description</p>
+      <div className="flex w-full justify-between items-end">
+        <div className="flex flex-col">
+          <h1 className="text-xl md:text-2xl">Organization&apos;s</h1>
+          <p className="text-md text-muted-foreground">
+            Control access and manage multiple chatbot projects.
+          </p>
+        </div>
+        <CreateOrganization />
       </div>
       <Separator />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <CreateOrganization />
         {memberships.map((m) => (
           <Card key={m._id}>
             <CardHeader>

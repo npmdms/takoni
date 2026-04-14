@@ -37,6 +37,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import CreateKnowledge from "../create-knowledge";
 import EditKnowledge from "../edit-knowledge";
+import ViewKnowledge from "../view-knowledge";
 
 interface Knowledge {
   id: string;
@@ -140,22 +141,15 @@ export default function KnowledgeTable({
         header: "Actions",
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
+            <ViewKnowledge knowledge={row.original} />
             <Button
               variant="outline"
               size="sm"
               onClick={() => onEdit(row.original)}
             >
-              <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
+              <HugeiconsIcon icon={PencilEdit01Icon} />
               Edit
             </Button>
-            {/* <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => console.log("delete", row.original.id)}
-            >
-              <HugeiconsIcon icon={Delete02Icon} size={16} />
-              Delete
-            </Button> */}
           </div>
         ),
       },
@@ -309,7 +303,7 @@ export default function KnowledgeTable({
                       size="sm"
                       onClick={() => onEdit(k)}
                     >
-                      <HugeiconsIcon icon={PencilEdit01Icon} size={16} />
+                      <HugeiconsIcon icon={PencilEdit01Icon} />
                       Edit
                     </Button>
                     {/* <Button variant={"destructive"} size={"sm"}>

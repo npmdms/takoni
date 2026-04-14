@@ -19,6 +19,23 @@ const ChatbotSchema = new mongoose.Schema(
     welcomeMessage: { type: String },
     isActive: { type: Boolean, default: false },
     requirePreChat: { type: Boolean, default: false },
+    appearance: {
+      color: {
+        type: String,
+        enum: ["slate", "red", "orange", "green", "blue", "violet", "pink"],
+        default: "slate",
+      },
+      position: {
+        type: String,
+        enum: ["bottom-right", "bottom-left"],
+        default: "bottom-right",
+      },
+      size: {
+        type: String,
+        enum: ["sm", "md", "lg"],
+        default: "md",
+      },
+    },
   },
   { timestamps: true },
 );

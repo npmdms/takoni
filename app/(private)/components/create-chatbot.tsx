@@ -93,16 +93,10 @@ export default function CreateChatbot({ organizationId, slug }: Props) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Card className="hover:shadow-md transition duration-300 hover:cursor-pointer hover:bg-primary/3">
-            <CardHeader className="flex flex-col justify-center items-center text-center h-full">
-              <HugeiconsIcon icon={AddIcon} size={36} />
-              <CardTitle>Create Chatbot</CardTitle>
-              <CardDescription>
-                Create a new chatbot to handle customer conversations, answer
-                questions, and automate support for your organization.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <Button variant={"outline"}>
+            <HugeiconsIcon icon={AddIcon} />
+            New Chatbot
+          </Button>
         </SheetTrigger>
         <SheetContent className="overflow-y-auto pb-24">
           <SheetHeader>

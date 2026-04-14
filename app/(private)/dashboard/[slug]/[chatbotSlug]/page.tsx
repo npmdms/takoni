@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { BookIcon, EyeIcon } from "@hugeicons/core-free-icons";
 
 interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
@@ -41,30 +43,23 @@ export default async function ChatbotPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col">
-        <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col">
           <h1 className="text-xl md:text-2xl">{chatbot.name}</h1>
-          <Badge
-            className={
-              chatbot.isActive
-                ? "bg-emerald-500"
-                : "bg-muted text-muted-foreground"
-            }
-          >
-            {chatbot.isActive ? "Active" : "Inactive"}
-          </Badge>
+          <p className="text-md text-muted-foreground">
+            Configure knowledge base, and appearance of your chatbots.
+          </p>
         </div>
-        <p className="text-md text-muted-foreground">
-          {chatbot.description || "No description"}
-        </p>
-        <div className="flex items-center gap-3">
-          <Button className="w-fit" asChild>
+        <div className="flex flex-row flex-wrap gap-3">
+          <Button variant={"outline"} className="w-fit" asChild>
             <Link href={`/dashboard/${slug}/${chatbotSlug}/knowledge`}>
+              <HugeiconsIcon icon={BookIcon} />
               Knowledge Base
             </Link>
           </Button>
-          <Button className="w-fit" asChild>
+          <Button variant={"outline"} className="w-fit" asChild>
             <Link href={`/dashboard/${slug}/${chatbotSlug}/preview`}>
+              <HugeiconsIcon icon={EyeIcon} />
               Preview
             </Link>
           </Button>

@@ -120,7 +120,7 @@ export default function CreateKnowledge({ organizationId, chatbotId }: Props) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button size={"sm"}>
-          <HugeiconsIcon icon={BookIcon} />
+          <HugeiconsIcon icon={AddIcon} />
           Add Knowledge
         </Button>
       </SheetTrigger>

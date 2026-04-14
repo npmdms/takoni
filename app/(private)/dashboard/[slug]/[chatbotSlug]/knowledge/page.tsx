@@ -56,7 +56,9 @@ export default async function KnowledgePage({ params }: Props) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col">
           <h1 className="text-xl md:text-2xl">{chatbot.name} Knowledge</h1>
-          <p className="text-sm text-muted-foreground">Bla bla bla</p>
+          <p className="text-md text-muted-foreground">
+            Manage the information sources your AI uses to answer questions.
+          </p>
         </div>
         <Separator />
         <div className="grid grid-cols-1 gap-6">

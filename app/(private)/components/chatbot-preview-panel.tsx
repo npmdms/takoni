@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type ChatRole = "user" | "assistant";
@@ -31,8 +31,7 @@ export default function ChatbotPreviewPanel({
       {
         role: "assistant",
         content:
-          welcomeMessage?.trim() ||
-          `Hi! I am ${chatbotName}. Ask me anything to test this chatbot.`,
+          welcomeMessage?.trim() || `Hi! I am ${chatbotName}. Ask me anything.`,
       },
     ],
     [chatbotName, welcomeMessage],
@@ -42,6 +41,11 @@ export default function ChatbotPreviewPanel({
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isSending]);
 
   async function sendMessage() {
     const message = input.trim();
@@ -50,7 +54,15 @@ export default function ChatbotPreviewPanel({
     setIsSending(true);
     setError(null);
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
+
+    const updated = [
+      ...messages,
+      { role: "user" as ChatRole, content: message },
+    ];
+    setMessages(updated);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
     try {
       const res = await fetch(
@@ -58,45 +70,69 @@ export default function ChatbotPreviewPanel({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({ message, messages: updated }),
+          signal: controller.signal,
         },
       );
 
+      clearTimeout(timeout);
       const data = await res.json();
+
       if (!res.ok) {
-        setError(data.error ?? "Failed to get AI response.");
+        setError(data.error ?? "Failed to get response.");
         return;
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-    } catch {
-      setError("Unable to connect to preview API.");
+      const reply = typeof data.reply === "string" ? data.reply.trim() : "";
+      if (!reply) {
+        setError("Empty response.");
+        return;
+      }
+
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err?.name === "AbortError") {
+        setError("Request timed out. Try again.");
+      } else {
+        setError("Unable to connect.");
+      }
     } finally {
       setIsSending(false);
     }
   }
 
-  function resetConversation() {
-    setMessages(initialMessages);
-    setInput("");
-    setError(null);
-  }
-
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Live Preview</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">{chatbotName}</CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Qwen Turbo</Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setMessages(initialMessages);
+                  setError(null);
+                }}
+                disabled={isSending}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="max-h-[420px] overflow-y-auto rounded-md border p-3 space-y-3">
-            {messages.map((msg, idx) => (
+        <CardContent className="flex flex-col gap-3">
+          <div className="h-80 overflow-y-auto flex flex-col gap-2 border rounded-md p-3">
+            {messages.map((msg, i) => (
               <div
-                key={`${msg.role}-${idx}`}
+                key={i}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
+                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-foreground"
@@ -106,49 +142,42 @@ export default function ChatbotPreviewPanel({
                 </div>
               </div>
             ))}
+
+            {isSending && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-lg px-3 py-2 text-sm text-muted-foreground">
+                  Thinking...
+                </div>
+              </div>
+            )}
+
+            <div ref={bottomRef} />
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Type a message to test your chatbot..."
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type a message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendMessage();
+              }}
               disabled={isSending}
-              className="min-h-[100px]"
             />
-            <div className="flex gap-2">
-              <Button type="button" onClick={sendMessage} disabled={isSending || !input.trim()}>
-                {isSending ? "Sending..." : "Send Message"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={resetConversation}
-                disabled={isSending}
-              >
-                Reset
-              </Button>
-            </div>
+            <Button onClick={sendMessage} disabled={isSending || !input.trim()}>
+              Send
+            </Button>
           </div>
+          <p className="text-xs text-muted-foreground">Press Enter to send.</p>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Preview Notes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            This preview uses your chatbot configuration and active knowledge entries as
-            context when calling Qwen.
-          </p>
-          <div className="flex items-center gap-2">
-            <span>Provider:</span>
-            <Badge variant="outline">Alibaba Qwen</Badge>
-          </div>
-          <p>Set `QWEN_API_KEY` in your `.env` file to enable responses.</p>
+        <CardContent className="pt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>Uses your active knowledge entries as context.</span>
+          <Badge variant="outline">Alibaba Qwen</Badge>
         </CardContent>
       </Card>
     </div>

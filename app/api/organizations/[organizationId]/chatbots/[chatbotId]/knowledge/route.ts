@@ -7,6 +7,8 @@ import { Knowledge } from "@/models/Knowledge";
 import { Membership } from "@/models/Membership";
 import { createKnowledgeSchema } from "@/lib/validation/knowledge";
 
+const MAX_KNOWLEDGE_DOCUMENTS = 10;
+
 interface Props {
   params: Promise<{ chatbotId: string }>;
 }
@@ -60,6 +62,16 @@ export async function POST(req: NextRequest, { params }: Props) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
+        { status: 400 },
+      );
+    }
+
+    const totalKnowledge = await Knowledge.countDocuments({ chatbot: chatbotId });
+    if (totalKnowledge >= MAX_KNOWLEDGE_DOCUMENTS) {
+      return NextResponse.json(
+        {
+          error: `Knowledge limit reached. You can only save up to ${MAX_KNOWLEDGE_DOCUMENTS} documents.`,
+        },
         { status: 400 },
       );
     }

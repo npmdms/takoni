@@ -13,6 +13,10 @@ interface ChatMessage {
   content: string;
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 interface Props {
   organizationId: string;
   chatbotId: string;
@@ -90,9 +94,9 @@ export default function ChatbotPreviewPanel({
       }
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearTimeout(timeout);
-      if (err?.name === "AbortError") {
+      if (isAbortError(err)) {
         setError("Request timed out. Try again.");
       } else {
         setError("Unable to connect.");

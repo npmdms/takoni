@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Terjadi kesalahan internal server";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -53,10 +57,10 @@ export async function POST(req: NextRequest) {
       "Maaf, saya tidak bisa menjawab saat ini.";
 
     return NextResponse.json({ reply });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Route Error:", error);
     return NextResponse.json(
-      { error: "Terjadi kesalahan internal server" },
+      { error: getErrorMessage(error) },
       { status: 500 },
     );
   }

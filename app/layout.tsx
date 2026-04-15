@@ -38,6 +38,10 @@ export default function RootLayout({
         figtree.variable,
       )}
     >
+      <script
+        src="http://localhost:3000/borneo-sentra-digital/alex/widget.js"
+        async
+      ></script>
       <body className="min-h-full flex flex-col">
         <ProviderWrapper>
           <div>{children}</div>

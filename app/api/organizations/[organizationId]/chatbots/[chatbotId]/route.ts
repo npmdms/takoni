@@ -5,6 +5,7 @@ import { dbConnect } from "@/lib/mongodb";
 import { Membership } from "@/models/Membership";
 import { Chatbot } from "@/models/Chatbot";
 import { Knowledge } from "@/models/Knowledge";
+import { Message } from "@/models/Message";
 import { updateChatbotSchema } from "@/lib/validation/chatbot";
 import slugify from "slugify";
 
@@ -90,6 +91,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
     }
 
     await Knowledge.deleteMany({ chatbot: chatbotId });
+    await Message.deleteMany({ chatbot: chatbotId });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

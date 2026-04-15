@@ -47,6 +47,7 @@ export default async function ChatbotPage({ params }: Props) {
   if (!chatbot) notFound();
 
   const knowledgeCount = await Knowledge.countDocuments({ chatbot: chatbot._id });
+  const embedCode = chatbot.isActive && knowledgeCount > 0 ? `<script src="${`/${slug}/${chatbot.slug}/widget.js`}" data-chatbot-id="${chatbot._id}" data-color="${chatbot.appearance?.color ?? "slate"}" data-size="${chatbot.appearance?.size ?? "md"}" data-position="${chatbot.appearance?.position ?? "bottom-right"}"></script>` : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -217,6 +218,26 @@ export default async function ChatbotPage({ params }: Props) {
                 year: "numeric",
               })}
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Embed Widget
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {embedCode ? (
+              <code className="block text-xs bg-muted rounded-md px-3 py-2 break-all">
+                {embedCode}
+              </code>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Widget embed is available after chatbot is active and knowledge is
+                ready.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -18,10 +18,13 @@ import { Separator } from "@/components/ui/separator";
 import CreateOrganization from "../components/create-organization";
 import { Button } from "@/components/ui/button";
 import EditOrganization from "../components/edit-organization";
+import { dbConnect } from "@/lib/mongodb";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/sign-in");
+
+  await dbConnect();
 
   const memberships = await Membership.find({ user: session.user.id })
     .populate("organization")

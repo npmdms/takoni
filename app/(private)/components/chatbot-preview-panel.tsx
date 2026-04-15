@@ -62,7 +62,7 @@ export default function ChatbotPreviewPanel({
     setMessages(updated);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
       const res = await fetch(
@@ -171,13 +171,6 @@ export default function ChatbotPreviewPanel({
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">Press Enter to send.</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>Uses your active knowledge entries as context.</span>
-          <Badge variant="outline">Alibaba Qwen</Badge>
         </CardContent>
       </Card>
     </div>

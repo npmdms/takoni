@@ -13,6 +13,10 @@ interface ChatMessage {
   content: string;
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 interface Props {
   organizationId: string;
   chatbotId: string;
@@ -62,7 +66,7 @@ export default function ChatbotPreviewPanel({
     setMessages(updated);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
       const res = await fetch(
@@ -90,9 +94,9 @@ export default function ChatbotPreviewPanel({
       }
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearTimeout(timeout);
-      if (err?.name === "AbortError") {
+      if (isAbortError(err)) {
         setError("Request timed out. Try again.");
       } else {
         setError("Unable to connect.");
@@ -171,13 +175,6 @@ export default function ChatbotPreviewPanel({
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">Press Enter to send.</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>Uses your active knowledge entries as context.</span>
-          <Badge variant="outline">Alibaba Qwen</Badge>
         </CardContent>
       </Card>
     </div>

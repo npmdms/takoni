@@ -37,7 +37,10 @@ export default async function KnowledgePage({ params }: Props) {
   }).lean();
   if (!chatbot) NotFound();
 
-  const knowledge = await Knowledge.find({ chatbot: chatbot._id })
+  const knowledge = await Knowledge.find({
+    organizationId: org._id,
+    chatbotId: chatbot._id,
+  })
     .lean()
     .sort({ createdAt: -1 });
 

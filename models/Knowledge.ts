@@ -2,7 +2,12 @@ import mongoose from "mongoose";
 
 const KnowledgeSchema = new mongoose.Schema(
   {
-    chatbot: {
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    chatbotId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Chatbot",
       required: true,
@@ -34,8 +39,8 @@ const KnowledgeSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-KnowledgeSchema.index({ chatbot: 1 });
-KnowledgeSchema.index({ chatbot: 1, category: 1 });
+KnowledgeSchema.index({ organizationId: 1, chatbotId: 1 });
+KnowledgeSchema.index({ chatbotId: 1, category: 1 });
 
 export const Knowledge =
   mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);

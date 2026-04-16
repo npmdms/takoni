@@ -91,49 +91,5 @@ export default function ViewKnowledge({ knowledge }: Props) {
         </SheetHeader>
       </SheetContent>
     </Sheet>
-    // <Sheet open={open} onOpenChange={setOpen}>
-    //   <SheetTrigger asChild>
-    //     <Button variant="ghost" size="icon">
-    //       <HugeiconsIcon icon={EyeIcon} size={16} />
-    //     </Button>
-    //   </SheetTrigger>
-    //   <SheetContent className="overflow-y-auto">
-    //     <SheetHeader>
-    //       <SheetTitle>{knowledge.title}</SheetTitle>
-    //       <SheetDescription className="capitalize">
-    //         {knowledge.category}
-    //       </SheetDescription>
-    //       <Separator />
-    //     </SheetHeader>
-
-    //     <div className="flex flex-col gap-6 px-4 py-4">
-    //       <div className="flex flex-wrap items-center gap-2">
-    //           {knowledge.isActive ? "Active" : "Inactive"}
-    //         </Badge>
-    //       </div>
-
-    //       <Separator />
-
-    //       <div className="flex flex-col gap-2">
-    //         <p className="text-xs text-muted-foreground uppercase tracking-widest">
-    //           Content
-    //         </p>
-    //         <p className="text-sm leading-relaxed whitespace-pre-wrap">
-    //           {knowledge.content}
-    //         </p>
-    //       </div>
-
-    //       <Separator />
-
-    //       <div className="flex flex-col gap-1">
-    //         <p className="text-xs text-muted-foreground uppercase tracking-widest">
-    //           Added
-    //         </p>
-    //         <p className="text-sm text-muted-foreground">
-    //         </p>
-    //       </div>
-    //     </div>
-    //   </SheetContent>
-    // </Sheet>
   );
 }

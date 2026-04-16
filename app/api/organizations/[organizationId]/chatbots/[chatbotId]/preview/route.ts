@@ -11,6 +11,15 @@ interface Props {
   params: Promise<{ organizationId: string; chatbotId: string }>;
 }
 
+interface ChatCompletionMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 const QWEN_MODEL = process.env.QWEN_MODEL || "qwen3.5-flash";
 const QWEN_API_URL =
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
@@ -63,7 +72,8 @@ export async function POST(req: NextRequest, { params }: Props) {
     }
 
     const knowledges = await Knowledge.find({
-      chatbot: chatbotId,
+      organizationId,
+      chatbotId,
       isActive: true,
     })
       .select({ title: 1, content: 1 })
@@ -75,20 +85,24 @@ export async function POST(req: NextRequest, { params }: Props) {
         ? knowledges.map((k) => `[INFO] ${k.title}: ${k.content}`).join("\n")
         : "No knowledge base available.";
 
-    const systemPrompt = `Anda adalah ${chatbot.name}. Jawab HANYA berdasarkan konteks di bawah. 
-Jika jawaban tidak ada dalam konteks, katakan: "Maaf, info tidak tersedia. Hubungi ${supportEmail}".
-Jawab dengan singkat, padat, dan jelas.
+    const customSystemPrompt = chatbot.systemPrompt?.trim();
+    const systemPrompt = [
+      customSystemPrompt || `Anda adalah ${chatbot.name}.`,
+      "Jawab HANYA berdasarkan konteks di bawah.",
+      `Jika jawaban tidak ada dalam konteks, katakan: "Maaf, info tidak tersedia. Hubungi ${supportEmail}".`,
+      "Jawab dengan singkat, padat, dan jelas.",
+      "",
+      "KONTEKS PENGETAHUAN:",
+      contextText,
+    ].join("\n");
 
-KONTEKS PENGETAHUAN:
-${contextText}`;
-
-    const messages: any[] = [
+    const messages: ChatCompletionMessage[] = [
       { role: "system", content: systemPrompt },
       { role: "user", content: userMessage },
     ];
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); 
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       const response = await fetch(QWEN_API_URL, {
@@ -127,9 +141,9 @@ ${contextText}`;
         data.choices?.[0]?.message?.content || "Maaf, terjadi kesalahan.";
 
       return NextResponse.json({ reply: reply.trim() });
-    } catch (fetchError: any) {
+    } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
-      if (fetchError.name === "AbortError") {
+      if (isAbortError(fetchError)) {
         return NextResponse.json(
           { error: "Request timed out" },
           { status: 504 },

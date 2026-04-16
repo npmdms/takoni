@@ -306,10 +306,6 @@ export default function KnowledgeTable({
                       <HugeiconsIcon icon={PencilEdit01Icon} />
                       Edit
                     </Button>
-                    {/* <Button variant={"destructive"} size={"sm"}>
-                      <HugeiconsIcon icon={DeleteIcon} />
-                      Delete
-                    </Button> */}
                   </div>
                 </div>
               </CardContent>

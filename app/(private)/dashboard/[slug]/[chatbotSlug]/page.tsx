@@ -16,8 +16,11 @@ import {
   BookIcon,
   EyeIcon,
   PaintBrush02Icon,
+  Comment01Icon,
 } from "@hugeicons/core-free-icons";
 import { Knowledge } from "@/models/Knowledge";
+import { getAppBaseUrl } from "@/lib/chatbot-widget";
+import { Message } from "@/models/Message";
 
 interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
@@ -46,7 +49,19 @@ export default async function ChatbotPage({ params }: Props) {
   }).lean();
   if (!chatbot) notFound();
 
-  const knowledgeCount = await Knowledge.countDocuments({ chatbot: chatbot._id });
+  const knowledgeCount = await Knowledge.countDocuments({
+    organizationId: org._id,
+    chatbotId: chatbot._id,
+  });
+  const conversationCount = await Message.distinct("conversationId", {
+    chatbot: chatbot._id,
+    source: "widget",
+  }).then((ids) => ids.length);
+  const widgetUrl = `${getAppBaseUrl()}/${slug}/${chatbot.slug}/widget.js`;
+  const embedCode =
+    chatbot.isActive && knowledgeCount > 0
+      ? `<script src="${widgetUrl}" async></script>`
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,6 +108,12 @@ export default async function ChatbotPage({ params }: Props) {
                 Appearance
               </Link>
             </Button>
+            <Button variant={"outline"} className="justify-start" asChild>
+              <Link href={`/dashboard/${slug}/${chatbotSlug}/conversations`}>
+                <HugeiconsIcon icon={Comment01Icon} />
+                Conversations
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -106,6 +127,20 @@ export default async function ChatbotPage({ params }: Props) {
             <p className="text-2xl font-semibold">{knowledgeCount}</p>
             <p className="text-sm text-muted-foreground">
               {knowledgeCount === 1 ? "Document" : "Documents"} available
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Conversations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">{conversationCount}</p>
+            <p className="text-sm text-muted-foreground">
+              Widget sessions captured
             </p>
           </CardContent>
         </Card>
@@ -217,6 +252,33 @@ export default async function ChatbotPage({ params }: Props) {
                 year: "numeric",
               })}
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">
+              Embed Widget
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {embedCode ? (
+              <>
+                <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <p>1. Copy the script below.</p>
+                  <p>2. Paste it into your website layout or global template, right before the closing <code>{`</body>`}</code> tag.</p>
+                  <p>3. Publish your site. The chatbot will stay available while users navigate between pages.</p>
+                </div>
+                <code className="block text-xs bg-muted rounded-md px-3 py-2 break-all">
+                  {embedCode}
+                </code>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Widget embed is available only when the chatbot is active and at
+                least one knowledge document is ready.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

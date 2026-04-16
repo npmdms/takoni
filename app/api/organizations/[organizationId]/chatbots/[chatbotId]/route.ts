@@ -5,6 +5,7 @@ import { dbConnect } from "@/lib/mongodb";
 import { Membership } from "@/models/Membership";
 import { Chatbot } from "@/models/Chatbot";
 import { Knowledge } from "@/models/Knowledge";
+import { Message } from "@/models/Message";
 import { updateChatbotSchema } from "@/lib/validation/chatbot";
 import slugify from "slugify";
 
@@ -89,7 +90,8 @@ export async function DELETE(req: NextRequest, { params }: Props) {
       return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
     }
 
-    await Knowledge.deleteMany({ chatbot: chatbotId });
+    await Knowledge.deleteMany({ organizationId, chatbotId });
+    await Message.deleteMany({ chatbot: chatbotId });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

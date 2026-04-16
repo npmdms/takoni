@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     }
 
     const knowledge = await Knowledge.findOneAndUpdate(
-      { _id: knowledgeId, chatbot: chatbotId },
+      { _id: knowledgeId, organizationId, chatbotId },
       { ...parsed.data },
       { new: true },
     ).lean();
@@ -93,7 +93,8 @@ export async function DELETE(req: NextRequest, { params }: Props) {
 
     const knowledge = await Knowledge.findOneAndDelete({
       _id: knowledgeId,
-      chatbot: chatbotId,
+      organizationId,
+      chatbotId,
     }).lean();
 
     if (!knowledge)

@@ -10,11 +10,11 @@ import { createKnowledgeSchema } from "@/lib/validation/knowledge";
 const MAX_KNOWLEDGE_DOCUMENTS = 10;
 
 interface Props {
-  params: Promise<{ chatbotId: string }>;
+  params: Promise<{ organizationId: string; chatbotId: string }>;
 }
 
 export async function GET(req: NextRequest, { params }: Props) {
-  const { chatbotId } = await params;
+  const { organizationId, chatbotId } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session)
@@ -23,18 +23,24 @@ export async function GET(req: NextRequest, { params }: Props) {
   try {
     await dbConnect();
 
-    const chatbot = await Chatbot.findById(chatbotId).lean();
+    const chatbot = await Chatbot.findOne({
+      _id: chatbotId,
+      organization: organizationId,
+    }).lean();
     if (!chatbot)
       return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
 
     const membership = await Membership.findOne({
       user: session.user.id,
-      organization: chatbot.organization,
+      organization: organizationId,
     }).lean();
     if (!membership)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-    const knowledge = await Knowledge.find({ chatbot: chatbotId }).lean();
+    const knowledge = await Knowledge.find({
+      organizationId,
+      chatbotId,
+    }).lean();
 
     return NextResponse.json(knowledge, { status: 200 });
   } catch (error) {
@@ -44,7 +50,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 }
 
 export async function POST(req: NextRequest, { params }: Props) {
-  const { chatbotId } = await params;
+  const { organizationId, chatbotId } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session)
@@ -53,9 +59,19 @@ export async function POST(req: NextRequest, { params }: Props) {
   try {
     await dbConnect();
 
-    const chatbot = await Chatbot.findById(chatbotId).lean();
+    const chatbot = await Chatbot.findOne({
+      _id: chatbotId,
+      organization: organizationId,
+    }).lean();
     if (!chatbot)
       return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+
+    const membership = await Membership.findOne({
+      user: session.user.id,
+      organization: organizationId,
+    }).lean();
+    if (!membership)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
     const parsed = createKnowledgeSchema.safeParse(body);
@@ -66,7 +82,10 @@ export async function POST(req: NextRequest, { params }: Props) {
       );
     }
 
-    const totalKnowledge = await Knowledge.countDocuments({ chatbot: chatbotId });
+    const totalKnowledge = await Knowledge.countDocuments({
+      organizationId,
+      chatbotId,
+    });
     if (totalKnowledge >= MAX_KNOWLEDGE_DOCUMENTS) {
       return NextResponse.json(
         {
@@ -78,7 +97,8 @@ export async function POST(req: NextRequest, { params }: Props) {
 
     const knowledge = await Knowledge.create({
       ...parsed.data,
-      chatbot: chatbotId,
+      organizationId,
+      chatbotId,
       createdBy: session.user.id,
     });
 

@@ -19,6 +19,7 @@ import CreateOrganization from "../components/create-organization";
 import { Button } from "@/components/ui/button";
 import EditOrganization from "../components/edit-organization";
 import { dbConnect } from "@/lib/mongodb";
+import ManageMembers from "./components/manage-members";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -77,6 +78,11 @@ export default async function DashboardPage() {
                   supportEmail: m.organization.supportEmail,
                   address: m.organization.address,
                 }}
+              />
+              <ManageMembers
+                disabled={m.role !== "owner"}
+                organizationId={String(m.organization._id)}
+                organizationName={m.organization.name}
               />
               <Button asChild>
                 <Link href={`/dashboard/${m.organization.slug}`}>

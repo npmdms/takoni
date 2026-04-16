@@ -101,12 +101,14 @@ export async function DELETE(req: NextRequest, { params }: Props) {
 
     const chatbotIds = chatbots.map((c) => c._id);
 
-    await Knowledge.deleteMany({ chatbot: { $in: chatbotIds } });
-    
+    await Knowledge.deleteMany({
+      organizationId,
+      chatbotId: { $in: chatbotIds },
+    });
+
     await Chatbot.deleteMany({ organization: organizationId });
 
     await Membership.deleteMany({ organization: organizationId });
-
 
     await Organization.findByIdAndDelete(organizationId);
 

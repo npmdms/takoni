@@ -49,7 +49,10 @@ export default async function ChatbotPage({ params }: Props) {
   }).lean();
   if (!chatbot) notFound();
 
-  const knowledgeCount = await Knowledge.countDocuments({ chatbot: chatbot._id });
+  const knowledgeCount = await Knowledge.countDocuments({
+    organizationId: org._id,
+    chatbotId: chatbot._id,
+  });
   const conversationCount = await Message.distinct("conversationId", {
     chatbot: chatbot._id,
     source: "widget",

@@ -16,8 +16,8 @@ interface Props {
 }
 
 interface LeanMessage {
-  _id: string;
-  conversationId: string;
+  _id: { toString(): string } | string;
+  conversationId: { toString(): string } | string;
   role: "user" | "assistant";
   content: string;
   createdAt: string | Date;
@@ -71,12 +71,13 @@ export default async function ChatbotConversationsPage({ params }: Props) {
   >();
 
   for (const message of messages) {
+    const conversationId = String(message.conversationId);
     const createdAt = new Date(message.createdAt);
-    const existing = conversationMap.get(message.conversationId);
+    const existing = conversationMap.get(conversationId);
 
     if (!existing) {
-      conversationMap.set(message.conversationId, {
-        id: message.conversationId,
+      conversationMap.set(conversationId, {
+        id: conversationId,
         startedAt: createdAt,
         updatedAt: createdAt,
         visitorName: message.visitor?.name ?? "",
@@ -112,7 +113,7 @@ export default async function ChatbotConversationsPage({ params }: Props) {
       .slice()
       .reverse()
       .map((message) => ({
-        id: message._id,
+        id: String(message._id),
         role: message.role,
         content: message.content,
         createdAt: new Date(message.createdAt).toISOString(),

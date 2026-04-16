@@ -48,7 +48,8 @@ export async function GET(_: NextRequest, { params }: Props) {
     }
 
     const knowledgeCount = await Knowledge.countDocuments({
-      chatbot: data.chatbot._id,
+      organizationId: data.organizationId,
+      chatbotId: data.chatbot._id,
       isActive: true,
     });
 
@@ -86,7 +87,8 @@ export async function POST(req: NextRequest, { params }: Props) {
     }
 
     const knowledgeCount = await Knowledge.countDocuments({
-      chatbot: data.chatbot._id,
+      organizationId: data.organizationId,
+      chatbotId: data.chatbot._id,
       isActive: true,
     });
     if (knowledgeCount < 1) {
@@ -111,7 +113,8 @@ export async function POST(req: NextRequest, { params }: Props) {
     }
 
     const knowledges = await Knowledge.find({
-      chatbot: data.chatbot._id,
+      organizationId: data.organizationId,
+      chatbotId: data.chatbot._id,
       isActive: true,
     })
       .select({ title: 1, content: 1 })

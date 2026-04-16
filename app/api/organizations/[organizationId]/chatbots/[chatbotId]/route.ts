@@ -90,7 +90,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
       return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
     }
 
-    await Knowledge.deleteMany({ chatbot: chatbotId });
+    await Knowledge.deleteMany({ organizationId, chatbotId });
     await Message.deleteMany({ chatbot: chatbotId });
 
     return NextResponse.json({ success: true }, { status: 200 });

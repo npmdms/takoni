@@ -72,7 +72,8 @@ export async function POST(req: NextRequest, { params }: Props) {
     }
 
     const knowledges = await Knowledge.find({
-      chatbot: chatbotId,
+      organizationId,
+      chatbotId,
       isActive: true,
     })
       .select({ title: 1, content: 1 })

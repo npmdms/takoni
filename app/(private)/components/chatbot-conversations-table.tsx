@@ -96,7 +96,7 @@ export default function ChatbotConversationsTable({ conversations }: Props) {
                     View
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[85vh] overflow-hidden sm:max-w-2xl">
+                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>
                       {conversation.visitorName || "Anonymous visitor"}

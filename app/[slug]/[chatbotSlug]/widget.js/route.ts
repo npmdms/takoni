@@ -13,9 +13,6 @@ function getWidgetScript() {
   const defaultSize = getChatbotSizeTokens(DEFAULT_APPEARANCE.size);
 
   return `(function () {
-  if (window.__takoniWidgetLoaded) return;
-  window.__takoniWidgetLoaded = true;
-
   var currentScript = document.currentScript;
   if (!currentScript) return;
 
@@ -24,26 +21,36 @@ function getWidgetScript() {
 
   var orgSlug = match[1];
   var chatbotSlug = match[2];
+  var widgetKey = orgSlug + ":" + chatbotSlug;
+  window.__takoniWidgetLoadedMap = window.__takoniWidgetLoadedMap || {};
+  if (window.__takoniWidgetLoadedMap[widgetKey]) return;
+
   var baseUrl = new URL(currentScript.src).origin;
   var apiUrl = baseUrl + "/api/public/" + orgSlug + "/" + chatbotSlug;
   var storagePrefix = "takoni:" + orgSlug + ":" + chatbotSlug;
+  var hasInitialized = false;
 
-  var state = {
-    open: false,
-    loading: true,
-    sending: false,
-    preChatDone: false,
-    config: null,
-    messages: [],
-    error: "",
-  };
+  function initWidget() {
+    if (hasInitialized || !document.body) return;
+    hasInitialized = true;
+    window.__takoniWidgetLoadedMap[widgetKey] = true;
 
-  var root = document.createElement("div");
-  root.id = "takoni-chatbot-root";
-  document.body.appendChild(root);
+    var state = {
+      open: false,
+      loading: true,
+      sending: false,
+      preChatDone: false,
+      config: null,
+      messages: [],
+      error: "",
+    };
 
-  var style = document.createElement("style");
-  style.textContent = \`
+    var root = document.createElement("div");
+    root.id = "takoni-chatbot-root";
+    document.body.appendChild(root);
+
+    var style = document.createElement("style");
+    style.textContent = \`
     #takoni-chatbot-root {
       all: initial;
       --takoni-primary: ${defaultColors.primary};
@@ -265,8 +272,8 @@ function getWidgetScript() {
         align-self: flex-end;
       }
     }
-  \`;
-  document.head.appendChild(style);
+    \`;
+    document.head.appendChild(style);
 
   function safeStorageGet(key) {
     try {
@@ -494,29 +501,36 @@ function getWidgetScript() {
     }
   }
 
-  fetch(apiUrl, { method: "GET" })
-    .then(function (response) {
-      return response.json().then(function (data) {
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to load chatbot.");
-        }
-        return data;
+    fetch(apiUrl, { method: "GET" })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to load chatbot.");
+          }
+          return data;
+        });
+      })
+      .then(function (data) {
+        state.config = data.chatbot;
+        state.loading = false;
+        state.preChatDone = !state.config.requirePreChat || Boolean(getVisitor().name && getVisitor().email);
+        state.messages = state.config && !state.config.requirePreChat
+          ? [{ role: "assistant", content: getWelcomeMessage() }]
+          : [];
+        render();
+      })
+      .catch(function (_error) {
+        destroyWidget();
+        window.__takoniWidgetLoadedMap[widgetKey] = false;
       });
-    })
-    .then(function (data) {
-      state.config = data.chatbot;
-      state.loading = false;
-      state.preChatDone = !state.config.requirePreChat || Boolean(getVisitor().name && getVisitor().email);
-      state.messages = state.config && !state.config.requirePreChat
-        ? [{ role: "assistant", content: getWelcomeMessage() }]
-        : [];
-      render();
-    })
-    .catch(function (error) {
-      destroyWidget();
-    });
 
-  root.innerHTML = "";
+    root.innerHTML = "";
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initWidget, { once: true });
+  }
+  initWidget();
 })();`;
 }
 

@@ -60,7 +60,7 @@ export default async function ChatbotPage({ params }: Props) {
   const widgetUrl = `${getAppBaseUrl()}/${slug}/${chatbot.slug}/widget.js`;
   const embedCode =
     chatbot.isActive && knowledgeCount > 0
-      ? `<script src="${widgetUrl}" async></script>`
+      ? `<script src="${widgetUrl}" defer></script>`
       : null;
 
   return (

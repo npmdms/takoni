@@ -10,6 +10,19 @@ interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
 }
 
+// ✅ CORS HELPER
+function withCORS(response: NextResponse) {
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type");
+  return response;
+}
+
+// ✅ HANDLE PREFLIGHT
+export async function OPTIONS() {
+  return withCORS(new NextResponse(null, { status: 200 }));
+}
+
 function isAbortError(error: unknown) {
   return error instanceof Error && error.name === "AbortError";
 }
@@ -19,7 +32,9 @@ const QWEN_API_URL =
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 
 async function getPublicChatbot(slug: string, chatbotSlug: string) {
-  const org = await Organization.findOne({ slug }).select("_id supportEmail").lean();
+  const org = await Organization.findOne({ slug })
+    .select("_id supportEmail")
+    .lean();
   if (!org) return null;
 
   const chatbot = await Chatbot.findOne({
@@ -36,6 +51,7 @@ async function getPublicChatbot(slug: string, chatbotSlug: string) {
   };
 }
 
+// ================== GET ==================
 export async function GET(_: NextRequest, { params }: Props) {
   const { slug, chatbotSlug } = await params;
 
@@ -44,7 +60,9 @@ export async function GET(_: NextRequest, { params }: Props) {
 
     const data = await getPublicChatbot(slug, chatbotSlug);
     if (!data || !data.chatbot.isActive) {
-      return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: "Chatbot not found" }, { status: 404 }),
+      );
     }
 
     const knowledgeCount = await Knowledge.countDocuments({
@@ -54,28 +72,34 @@ export async function GET(_: NextRequest, { params }: Props) {
     });
 
     if (knowledgeCount < 1) {
-      return NextResponse.json({ error: "Chatbot not ready" }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: "Chatbot not ready" }, { status: 404 }),
+      );
     }
 
-    return NextResponse.json({
-      chatbot: buildPublicChatbotConfig(data.chatbot),
-      knowledgeCount,
-    });
+    return withCORS(
+      NextResponse.json({
+        chatbot: buildPublicChatbotConfig(data.chatbot),
+        knowledgeCount,
+      }),
+    );
   } catch (error) {
     console.error("[public chatbot GET]", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
+    return withCORS(
+      NextResponse.json({ error: "Internal Server Error" }, { status: 500 }),
     );
   }
 }
 
+// ================== POST ==================
 export async function POST(req: NextRequest, { params }: Props) {
   const { slug, chatbotSlug } = await params;
 
   const apiKey = process.env.QWEN_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "API Key missing" }, { status: 500 });
+    return withCORS(
+      NextResponse.json({ error: "API Key missing" }, { status: 500 }),
+    );
   }
 
   try {
@@ -83,7 +107,9 @@ export async function POST(req: NextRequest, { params }: Props) {
 
     const data = await getPublicChatbot(slug, chatbotSlug);
     if (!data || !data.chatbot.isActive) {
-      return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: "Chatbot not found" }, { status: 404 }),
+      );
     }
 
     const knowledgeCount = await Knowledge.countDocuments({
@@ -91,24 +117,31 @@ export async function POST(req: NextRequest, { params }: Props) {
       chatbotId: data.chatbot._id,
       isActive: true,
     });
+
     if (knowledgeCount < 1) {
-      return NextResponse.json({ error: "Chatbot not ready" }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: "Chatbot not ready" }, { status: 404 }),
+      );
     }
 
     const body = await req.json();
     const userMessage =
       typeof body?.message === "string" ? body.message.trim() : "";
     const conversationId =
-      typeof body?.conversationId === "string" ? body.conversationId.trim() : "";
+      typeof body?.conversationId === "string"
+        ? body.conversationId.trim()
+        : "";
     const visitorName =
       typeof body?.visitor?.name === "string" ? body.visitor.name.trim() : "";
     const visitorEmail =
       typeof body?.visitor?.email === "string" ? body.visitor.email.trim() : "";
 
     if (!userMessage || !conversationId) {
-      return NextResponse.json(
-        { error: "Message content is empty" },
-        { status: 400 },
+      return withCORS(
+        NextResponse.json(
+          { error: "Message content is empty" },
+          { status: 400 },
+        ),
       );
     }
 
@@ -178,13 +211,14 @@ export async function POST(req: NextRequest, { params }: Props) {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        console.error("Qwen API Error:", errData);
-        return NextResponse.json(
-          {
-            error: "AI Service Error",
-            details: errData.error?.message || response.statusText,
-          },
-          { status: 502 },
+        return withCORS(
+          NextResponse.json(
+            {
+              error: "AI Service Error",
+              details: errData.error?.message || response.statusText,
+            },
+            { status: 502 },
+          ),
         );
       }
 
@@ -205,22 +239,20 @@ export async function POST(req: NextRequest, { params }: Props) {
         },
       });
 
-      return NextResponse.json({ reply: reply.trim() });
+      return withCORS(NextResponse.json({ reply: reply.trim() }));
     } catch (fetchError: unknown) {
       clearTimeout(timeoutId);
       if (isAbortError(fetchError)) {
-        return NextResponse.json(
-          { error: "Request timed out" },
-          { status: 504 },
+        return withCORS(
+          NextResponse.json({ error: "Request timed out" }, { status: 504 }),
         );
       }
       throw fetchError;
     }
   } catch (error) {
     console.error("[public chatbot POST]", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
+    return withCORS(
+      NextResponse.json({ error: "Internal Server Error" }, { status: 500 }),
     );
   }
 }

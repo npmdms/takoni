@@ -7,7 +7,7 @@ import { Knowledge } from "@/models/Knowledge";
 import { Membership } from "@/models/Membership";
 import { createKnowledgeSchema } from "@/lib/validation/knowledge";
 
-const MAX_KNOWLEDGE_DOCUMENTS = 10;
+const MAX_KNOWLEDGE_DOCUMENTS = 15;
 
 interface Props {
   params: Promise<{ organizationId: string; chatbotId: string }>;

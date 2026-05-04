@@ -1,4 +1,9 @@
 import { authOptions } from "@/lib/auth";
+import {
+  detectReplyLanguage,
+  getNoContextReply,
+  getReplyLanguageInstruction,
+} from "@/lib/message-language";
 import { dbConnect } from "@/lib/mongodb";
 import { Membership } from "@/models/Membership";
 import { Organization } from "@/models/Organization";
@@ -85,14 +90,17 @@ export async function POST(req: NextRequest, { params }: Props) {
         ? knowledges.map((k) => `[INFO] ${k.title}: ${k.content}`).join("\n")
         : "No knowledge base available.";
 
+    const replyLanguage = detectReplyLanguage(userMessage);
     const customSystemPrompt = chatbot.systemPrompt?.trim();
+    const noContextReply = getNoContextReply(replyLanguage, supportEmail);
     const systemPrompt = [
-      customSystemPrompt || `Anda adalah ${chatbot.name}.`,
-      "Jawab HANYA berdasarkan konteks di bawah.",
-      `Jika jawaban tidak ada dalam konteks, katakan: "Maaf, info tidak tersedia. Hubungi ${supportEmail}".`,
-      "Jawab dengan singkat, padat, dan jelas.",
+      customSystemPrompt || `You are ${chatbot.name}.`,
+      getReplyLanguageInstruction(replyLanguage),
+      "Answer ONLY using the knowledge context below.",
+      `If the answer is not in the context, say exactly: "${noContextReply}"`,
+      "Keep the answer short, clear, and direct.",
       "",
-      "KONTEKS PENGETAHUAN:",
+      "KNOWLEDGE CONTEXT:",
       contextText,
     ].join("\n");
 
@@ -138,7 +146,7 @@ export async function POST(req: NextRequest, { params }: Props) {
 
       const data = await response.json();
       const reply =
-        data.choices?.[0]?.message?.content || "Maaf, terjadi kesalahan.";
+        data.choices?.[0]?.message?.content || noContextReply;
 
       return NextResponse.json({ reply: reply.trim() });
     } catch (fetchError: unknown) {

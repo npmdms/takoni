@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  detectReplyLanguage,
+  getReplyLanguageInstruction,
+} from "@/lib/message-language";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Terjadi kesalahan internal server";
@@ -16,6 +20,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const replyLanguage = detectReplyLanguage(userMessage);
     const response = await fetch(
       "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
       {
@@ -29,8 +34,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               role: "system",
-              content:
-                "Jawab dengan singkat.",
+              content: `${getReplyLanguageInstruction(replyLanguage)} Keep the answer short and clear.`,
             },
             {
               role: "user",

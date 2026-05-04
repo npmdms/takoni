@@ -15,7 +15,6 @@ interface Props {
   params: Promise<{ slug: string; chatbotSlug: string }>;
 }
 
-// ✅ CORS HELPER
 function withCORS(response: NextResponse) {
   response.headers.set("Access-Control-Allow-Origin", "*");
   response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -23,7 +22,6 @@ function withCORS(response: NextResponse) {
   return response;
 }
 
-// ✅ HANDLE PREFLIGHT
 export async function OPTIONS() {
   return withCORS(new NextResponse(null, { status: 200 }));
 }
@@ -56,7 +54,6 @@ async function getPublicChatbot(slug: string, chatbotSlug: string) {
   };
 }
 
-// ================== GET ==================
 export async function GET(_: NextRequest, { params }: Props) {
   const { slug, chatbotSlug } = await params;
 
@@ -96,7 +93,6 @@ export async function GET(_: NextRequest, { params }: Props) {
   }
 }
 
-// ================== POST ==================
 export async function POST(req: NextRequest, { params }: Props) {
   const { slug, chatbotSlug } = await params;
 

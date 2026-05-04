@@ -57,7 +57,7 @@ export default async function ChatbotPage({ params }: Props) {
     chatbot: chatbot._id,
     source: "widget",
   }).then((ids) => ids.length);
-  const widgetUrl = `${getAppBaseUrl()}/${slug}/${chatbot.slug}/widget.js`;
+  const widgetUrl = `${getAppBaseUrl()}${slug}/${chatbot.slug}/widget.js`;
   const embedCode =
     chatbot.isActive && knowledgeCount > 0
       ? `<script src="${widgetUrl}" defer></script>`

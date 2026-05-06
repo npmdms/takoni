@@ -41,146 +41,201 @@ interface Props {
   conversations: ConversationRow[];
 }
 
+function sanitizeFilenamePart(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function downloadJson(filename: string, data: unknown) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function ChatbotConversationsTable({ conversations }: Props) {
+  const exportAllConversations = () => {
+    downloadJson(
+      `conversations-${new Date().toISOString().slice(0, 10)}.json`,
+      conversations,
+    );
+  };
+
+  const exportConversation = (conversation: ConversationRow) => {
+    const personPart = sanitizeFilenamePart(
+      conversation.visitorName ||
+        conversation.visitorEmail ||
+        conversation.id.slice(0, 8),
+    );
+
+    downloadJson(`conversation-${personPart || "visitor"}.json`, conversation);
+  };
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Visitor</TableHead>
-          <TableHead>Started</TableHead>
-          <TableHead>Updated</TableHead>
-          <TableHead>Total Messages</TableHead>
-          <TableHead>Action</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {conversations.map((conversation) => (
-          <TableRow key={conversation.id}>
-            <TableCell className="whitespace-normal">
-              <div className="flex flex-col gap-1">
-                <p className="font-medium">
-                  {conversation.visitorName || "Anonymous visitor"}
-                </p>
-                {conversation.visitorEmail ? (
-                  <p className="text-sm text-muted-foreground">
-                    {conversation.visitorEmail}
-                  </p>
-                ) : null}
-              </div>
-            </TableCell>
-            <TableCell className="whitespace-normal text-sm text-muted-foreground">
-              {new Date(conversation.startedAt).toLocaleString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </TableCell>
-            <TableCell className="whitespace-normal text-sm text-muted-foreground">
-              {new Date(conversation.updatedAt).toLocaleString("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline">{conversation.totalMessages}</Badge>
-            </TableCell>
-            <TableCell>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {conversation.visitorName || "Anonymous visitor"}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {conversation.visitorEmail || "No email provided"}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex flex-col gap-3 overflow-y-auto pr-2">
-                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                      <p>
-                        Started{" "}
-                        {new Date(conversation.startedAt).toLocaleString(
-                          "id-ID",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
-                      </p>
-                      <p>
-                        Updated{" "}
-                        {new Date(conversation.updatedAt).toLocaleString(
-                          "id-ID",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
-                      </p>
-                      <p className="font-mono text-xs break-all">
-                        {conversation.id}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      {conversation.messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
-                              message.role === "user"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-foreground"
-                            }`}
-                          >
-                            <p>{message.content}</p>
-                            <p
-                              className={`mt-2 text-[11px] ${
-                                message.role === "user"
-                                  ? "text-primary-foreground/80"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {new Date(message.createdAt).toLocaleString(
-                                "id-ID",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <DialogFooter showCloseButton />
-                </DialogContent>
-              </Dialog>
-            </TableCell>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={exportAllConversations}>
+          Export All JSON
+        </Button>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Visitor</TableHead>
+            <TableHead>Started</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead>Total Messages</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {conversations.map((conversation) => (
+            <TableRow key={conversation.id}>
+              <TableCell className="whitespace-normal">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium">
+                    {conversation.visitorName || "Anonymous visitor"}
+                  </p>
+                  {conversation.visitorEmail ? (
+                    <p className="text-sm text-muted-foreground">
+                      {conversation.visitorEmail}
+                    </p>
+                  ) : null}
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-normal text-sm text-muted-foreground">
+                {new Date(conversation.startedAt).toLocaleString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </TableCell>
+              <TableCell className="whitespace-normal text-sm text-muted-foreground">
+                {new Date(conversation.updatedAt).toLocaleString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">{conversation.totalMessages}</Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        View
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {conversation.visitorName || "Anonymous visitor"}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {conversation.visitorEmail || "No email provided"}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-3 overflow-y-auto pr-2">
+                        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                          <p>
+                            Started{" "}
+                            {new Date(conversation.startedAt).toLocaleString(
+                              "id-ID",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </p>
+                          <p>
+                            Updated{" "}
+                            {new Date(conversation.updatedAt).toLocaleString(
+                              "id-ID",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </p>
+                          <p className="font-mono text-xs break-all">
+                            {conversation.id}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          {conversation.messages.map((message) => (
+                            <div
+                              key={message.id}
+                              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
+                                  message.role === "user"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-foreground"
+                                }`}
+                              >
+                                <p>{message.content}</p>
+                                <p
+                                  className={`mt-2 text-[11px] ${
+                                    message.role === "user"
+                                      ? "text-primary-foreground/80"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {new Date(message.createdAt).toLocaleString(
+                                    "id-ID",
+                                    {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <DialogFooter showCloseButton />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => exportConversation(conversation)}
+                  >
+                    Export JSON
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

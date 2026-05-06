@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Website Chatbot AI pada Platform Resmeku
 
-## Getting Started
+Repositori ini merupakan lampiran source code skripsi.
 
-First, run the development server:
+## Informasi Skripsi
+
+- **Nama**: Gusti Dimas Novarossi
+- **NIM**: 2109106124
+- **Judul Skripsi**: PENERAPAN MODEL WATERFALL DALAM PENGEMBANGAN WEBSITE CHATBOT AI PADA PLATFORM RESMEKU
+
+## Tujuan Repositori
+
+Source code ini dipublikasikan untuk kebutuhan dokumentasi akademik, referensi, dan pembelajaran terkait pengembangan website chatbot AI.
+
+## Teknologi yang Digunakan
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+## Cara Menjalankan Proyek
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Jalankan server development:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Buka di browser:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Ketentuan Penggunaan Source Code
 
-## Learn More
+Source code ini **bebas digunakan untuk pembelajaran, penelitian, dan pengembangan non-komersial**.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Namun, source code ini **tidak diizinkan digunakan oleh perusahaan atau pihak mana pun untuk memperoleh revenue/keuntungan komersial** tanpa izin tertulis dari penulis.

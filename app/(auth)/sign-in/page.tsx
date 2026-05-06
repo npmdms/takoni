@@ -10,9 +10,9 @@ export default function SignInPage() {
     <>
       <div className="flex flex-col gap-6 ">
         <div className="flex flex-col">
-          <h1 className="text-3xl md:text-4xl">Sign In to Takoni</h1>
+          <h1 className="text-3xl md:text-4xl">Sign In to Web Chatbot</h1>
           <p className="text-sm text-muted-foreground">
-            New to Takoni?{" "}
+            New to Web Chatbot?{" "}
             <span className="group">
               <Link
                 href={"/sign-up"}

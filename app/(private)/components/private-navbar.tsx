@@ -25,7 +25,7 @@ export default function PrivateNavbar() {
     <nav className="flex flex-col bg-white text-sm">
       <div className="flex flex-row justify-between items-center p-3">
         <Link href={"/dashboard"} className="font-semibold">
-          Takoni
+          Web Chatbot
         </Link>
 
         <ul className="hidden md:flex items-center gap-3">

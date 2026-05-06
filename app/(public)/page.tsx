@@ -17,7 +17,7 @@ export default function HomePage() {
           customer questions.
         </h1>
         <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-          Takoni lets you embed a chatbot on your website. Teach it what to
+          Web Chatbot lets you embed a chatbot on your website. Teach it what to
           know, turn it on, and let it work.
         </p>
         <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function HomePage() {
         </div>
         <p className="text-muted-foreground leading-relaxed">
           You write down what your business does, what your policies are, what
-          questions people usually ask. Takoni turns that into a chatbot. When a
+          questions people usually ask. Web Chatbot turns that into a chatbot. When a
           visitor asks something, the bot looks through what you wrote and
           answers. If it can&apos;t, it says so.
         </p>
@@ -187,7 +187,7 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="flex items-center justify-between">
-        <span className="font-serif text-sm">Takoni</span>
+        <span className="font-serif text-sm">Web Chatbot</span>
         <span className="text-xs text-muted-foreground">Built in Borneo.</span>
       </footer>
     </main>

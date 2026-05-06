@@ -12,7 +12,7 @@ export default function PublicNavbar() {
       <nav className="flex flex-col bg-white text-sm">
         <div className="flex flex-row justify-between items-center p-3">
           <Link href={"/"} className="font-semibold">
-            Takoni
+            Web Chatbot
           </Link>
           <ul className="flex items-center gap-3">
             <Button variant={"outline"} asChild>

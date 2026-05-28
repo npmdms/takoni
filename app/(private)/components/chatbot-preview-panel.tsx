@@ -113,7 +113,7 @@ export default function ChatbotPreviewPanel({
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">{chatbotName}</CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="outline">Qwen Turbo</Badge>
+              <Badge variant="outline">Qwen3.6-Flash</Badge>
               <Button
                 variant="ghost"
                 size="sm"

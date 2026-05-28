@@ -30,7 +30,7 @@ function isAbortError(error: unknown) {
   return error instanceof Error && error.name === "AbortError";
 }
 
-const QWEN_MODEL = process.env.QWEN_MODEL || "qwen3.5-flash";
+const QWEN_MODEL = process.env.QWEN_MODEL || "qwen3.6-flash";
 const QWEN_API_URL =
   "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 
